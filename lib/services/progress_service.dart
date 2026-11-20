@@ -78,6 +78,24 @@ class ProgressService extends ChangeNotifier {
     _loadList(prefs, 'generated_stacks', _generatedStacks, StackLesson.fromJson);
     _loadList(prefs, 'generated_pyramids', _generatedPyramids, PyramidLesson.fromJson);
     _loadList(prefs, 'generated_calendars', _generatedCalendars, CalendarLesson.fromJson);
+    // du lieu cu co the co nhieu bai tu sinh: chi giu bai moi nhat
+    void keepLast(List<dynamic> l) {
+      if (l.length > 1) l.removeRange(0, l.length - 1);
+    }
+    for (final l in <List<dynamic>>[
+      _generated, _generatedDice, _generatedNets, _generatedMarks, _generatedHides,
+      _generatedBacks, _generatedPicks, _generatedHalves, _generatedDotSquares,
+      _generatedPyramids, _generatedCalendars,
+    ]) {
+      keepLast(l);
+    }
+    final lastByKind = <String, StackLesson>{};
+    for (final e in _generatedStacks) {
+      lastByKind[e.kind] = e;
+    }
+    _generatedStacks
+      ..clear()
+      ..addAll(lastByKind.values);
     notifyListeners();
   }
 
@@ -105,73 +123,96 @@ class ProgressService extends ChangeNotifier {
   }
 
   Future<void> addGenerated(Lesson l) async {
-    _generated.add(l);
+    _generated
+      ..clear()
+      ..add(l); // chi giu 1 bai tu sinh, bai moi thay bai cu
     await _save();
     notifyListeners();
   }
 
   Future<void> addGeneratedDice(DiceLesson l) async {
-    _generatedDice.add(l);
+    _generatedDice
+      ..clear()
+      ..add(l); // chi giu 1 bai tu sinh, bai moi thay bai cu
     await _save();
     notifyListeners();
   }
 
   Future<void> addGeneratedNet(NetLesson l) async {
-    _generatedNets.add(l);
+    _generatedNets
+      ..clear()
+      ..add(l); // chi giu 1 bai tu sinh, bai moi thay bai cu
     await _save();
     notifyListeners();
   }
 
   Future<void> addGeneratedMark(MarkLesson l) async {
-    _generatedMarks.add(l);
+    _generatedMarks
+      ..clear()
+      ..add(l); // chi giu 1 bai tu sinh, bai moi thay bai cu
     await _save();
     notifyListeners();
   }
 
   Future<void> addGeneratedHide(HideLesson l) async {
-    _generatedHides.add(l);
+    _generatedHides
+      ..clear()
+      ..add(l); // chi giu 1 bai tu sinh, bai moi thay bai cu
     await _save();
     notifyListeners();
   }
 
   Future<void> addGeneratedPyramid(PyramidLesson l) async {
-    _generatedPyramids.add(l);
+    _generatedPyramids
+      ..clear()
+      ..add(l); // chi giu 1 bai tu sinh, bai moi thay bai cu
     await _save();
     notifyListeners();
   }
 
   Future<void> addGeneratedBack(BackLesson l) async {
-    _generatedBacks.add(l);
+    _generatedBacks
+      ..clear()
+      ..add(l); // chi giu 1 bai tu sinh, bai moi thay bai cu
     await _save();
     notifyListeners();
   }
 
   Future<void> addGeneratedPick(PickLesson l) async {
-    _generatedPicks.add(l);
+    _generatedPicks
+      ..clear()
+      ..add(l); // chi giu 1 bai tu sinh, bai moi thay bai cu
     await _save();
     notifyListeners();
   }
 
   Future<void> addGeneratedHalf(HalfLesson l) async {
-    _generatedHalves.add(l);
+    _generatedHalves
+      ..clear()
+      ..add(l); // chi giu 1 bai tu sinh, bai moi thay bai cu
     await _save();
     notifyListeners();
   }
 
   Future<void> addGeneratedDotSquare(DotSquareLesson l) async {
-    _generatedDotSquares.add(l);
+    _generatedDotSquares
+      ..clear()
+      ..add(l); // chi giu 1 bai tu sinh, bai moi thay bai cu
     await _save();
     notifyListeners();
   }
 
   Future<void> addGeneratedStack(StackLesson l) async {
+    _generatedStacks.removeWhere((e) => e.kind == l.kind); // moi dang chi giu 1 bai tu sinh
     _generatedStacks.add(l);
     await _save();
     notifyListeners();
   }
 
   Future<void> addGeneratedCalendar(CalendarLesson l) async {
-    _generatedCalendars.add(l);
+    _generatedCalendars
+      ..clear()
+      ..add(l); // chi giu 1 bai tu sinh, bai moi thay bai cu
     await _save();
     notifyListeners();
   }
