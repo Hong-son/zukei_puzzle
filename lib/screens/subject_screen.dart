@@ -9,6 +9,7 @@ import 'calendar_category_screen.dart';
 import 'half_category_screen.dart';
 import 'dotsquare_category_screen.dart';
 import 'kokugo_menu_screen.dart';
+import 'view_menu_screen.dart';
 
 // Man hinh cap 2: danh sach cac dang bai cua mot mon (sansu hoac kokugo).
 class SubjectScreen extends StatelessWidget {
@@ -72,6 +73,15 @@ class SubjectScreen extends StatelessWidget {
       'subject': 'sansu',
     },
     {
+      'id': 'view',
+      'icon': '👁️',
+      'name': {'ja': 'みえかた・かげ', 'en': 'Views & Shadows', 'vi': 'Nhìn từ trên & bóng'},
+      'desc': {'ja': 'ま上から・かげから かんがえよう', 'en': 'Think about how things look', 'vi': 'Suy nghĩ về cách nhìn vật'},
+      'color': Color(0xFF00ACC1),
+      'mode': 'view',
+      'subject': 'sansu',
+    },
+    {
       'id': 'kanji',
       'icon': '✍️',
       'name': {'ja': 'かん字', 'en': 'Kanji', 'vi': 'Chữ Hán'},
@@ -94,6 +104,8 @@ class SubjectScreen extends StatelessWidget {
         return HalfCategoryScreen(category: cat);
       case 'dotsquare':
         return DotSquareCategoryScreen(category: cat);
+      case 'view':
+        return ViewMenuScreen(category: cat);
       case 'kokugo':
         return KokugoMenuScreen(category: cat);
       default:

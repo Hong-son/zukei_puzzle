@@ -1,20 +1,47 @@
 import 'dart:math';
 import '../models/kokugo_lesson.dart';
+import 'stroke_data.dart';
 
 // Bai 国語 (lop 1): viet chu Han (kaki) va viet cach doc (yomi).
 // Kho tu vung va cau vi du do ta tu soan.
 class KokugoEngine {
-  static const List<String> kinds = ['kaki', 'yomi'];
+  static const List<String> kinds = ['kaki', 'yomi', 'hitsujun', 'hantai', 'kanyou'];
 
   static const Map<String, Map<String, String>> baseNames = {
     'kaki': {'ja': 'かん字を かこう', 'en': 'Write the Kanji', 'vi': 'Viết chữ Hán'},
     'yomi': {'ja': 'かん字の よみ', 'en': 'Kanji Readings', 'vi': 'Cách đọc chữ Hán'},
+    'hitsujun': {'ja': 'かん字の ひつじゅん', 'en': 'Stroke Order', 'vi': 'Thứ tự nét chữ Hán'},
+    'hantai': {'ja': 'はんたいの いみの かん字', 'en': 'Opposite Kanji', 'vi': 'Chữ Hán trái nghĩa'},
+    'kanyou': {'ja': 'かんようく', 'en': 'Idioms', 'vi': 'Thành ngữ (bộ phận cơ thể)'},
   };
+
+  static const List<String> numerals = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十'];
 
   static const List<String> _circ = ['①', '②', '③', '④', '⑤', '⑥', '⑦', '⑧', '⑨', '⑩'];
   static const List<String> _kana3 = ['ア', 'イ', 'ウ'];
 
   static Map<String, String> questionFor(String kind) {
+    if (kind == 'hitsujun') {
+      return {
+        'ja': '→の ところは なんばん目に かきますか。○に かん字で すう字を かきましょう。',
+        'en': 'Which stroke (in writing order) is the arrow pointing to? Write the number in kanji in the circle.',
+        'vi': 'Mũi tên chỉ nét thứ mấy (theo thứ tự viết)? Viết số bằng chữ Hán vào hình tròn.',
+      };
+    }
+    if (kind == 'kanyou') {
+      return {
+        'ja': '下の いみに あう かんようくに なるように、からだの ぶぶんを あらわす ことばを □に かきましょう。',
+        'en': 'Write the word for a body part in the box so that the idiom matches the meaning below.',
+        'vi': 'Viết từ chỉ bộ phận cơ thể vào ô để thành quán dụng ngữ đúng với nghĩa bên dưới.',
+      };
+    }
+    if (kind == 'hantai') {
+      return {
+        'ja': 'はんたいの いみに なる かん字を くみあわせて、ことばを かんせいさせましょう。できた ことばを □に、よみがなを（　）に かきましょう。',
+        'en': 'Combine kanji with opposite meanings to make words. Write each word in the boxes and its reading in ( ).',
+        'vi': 'Ghép các chữ Hán có nghĩa trái ngược để thành từ. Viết từ vào ô, cách đọc vào ( ).',
+      };
+    }
     if (kind == 'kaki') {
       return {
         'ja': 'かたかなを かん字に なおして、□に かきましょう。',
@@ -30,6 +57,27 @@ class KokugoEngine {
   }
 
   static String wrongMessage(String kind, String lang) {
+    if (kind == 'hitsujun') {
+      return lang == 'ja'
+          ? 'ちがう ところが あるよ。かく じゅんばんを おもいだして みよう'
+          : lang == 'en'
+              ? 'Some answers are wrong. Think about the writing order'
+              : 'Có câu chưa đúng. Hãy nhớ lại thứ tự viết nét';
+    }
+    if (kind == 'kanyou') {
+      return lang == 'ja'
+          ? 'ちがう ところが あるよ。いみを よく よんで、からだの ことばを かんがえよう'
+          : lang == 'en'
+              ? 'Something is wrong. Read the meaning again and think of the body part'
+              : 'Có chỗ chưa đúng. Hãy đọc kỹ nghĩa và nghĩ đến bộ phận cơ thể';
+    }
+    if (kind == 'hantai') {
+      return lang == 'ja'
+          ? 'ちがう ところが あるよ。はんたいの いみの かん字の くみあわせと よみを たしかめよう'
+          : lang == 'en'
+              ? 'Something is wrong. Check the opposite pairs and the readings'
+              : 'Có chỗ chưa đúng. Hãy kiểm tra cặp chữ trái nghĩa và cách đọc';
+    }
     if (kind == 'kaki') {
       return lang == 'ja'
           ? 'できなかった ところを もういちど かいてみよう'
@@ -59,6 +107,76 @@ class KokugoEngine {
     ]);
   }
 
+  // cau 'hitsujun': ch = chu Han, n = net duoc chi, p = dau net (0/1/-1), a = goc mui ten
+  static KokugoItem _strokeItem(int no, String ch, int n, {int p = -1, double? a}) {
+    return KokugoItem(
+      label: '（${no + 1}）',
+      parts: [_t(ch)],
+      extra: {'k': ch, 'n': n, 'p': p, if (a != null) 'a': a},
+    );
+  }
+
+  // cau 'kanyou': dap an (nhieu cach viet cach nhau bang |) + phan sau cho trong + nghia
+  static KokugoItem _idiomItem(int no, String before, String answers, String after, String meaning) {
+    return KokugoItem(
+      label: '（${no + 1}）',
+      parts: [
+        if (before.isNotEmpty) _t(before),
+        KokugoPart('', blank: true, reads: answers.split('|')),
+        _t(after),
+      ],
+      extra: {'m': meaning},
+    );
+  }
+
+  // [truoc cho trong, dap an, sau cho trong, nghia]
+  static const List<List<String>> _idiomBank = [
+    ['', 'あたま|頭', 'がかたい', 'ものわかりが わるい。ゆうずうが きかない。'],
+    ['', 'あし|足', 'がぼうになる', 'ながい あいだ 立ったり あるいたり して、足が つかれる。'],
+    ['', 'くち|口', 'がすべる', 'いっては いけないことを、うっかり いってしまう。'],
+    ['', 'て|手', 'にあせをにぎる', 'どうなることかと はらはらする。'],
+    ['', 'みみ|耳', 'をうたがう', 'しんじられない はなしを きいて、とまどう。'],
+    ['', 'め|目', 'をまるくする', 'びっくりして 目を 見ひらく。'],
+    ['', 'はな|鼻', 'がたかい', 'とくいになる。ほこらしくおもう。'],
+    ['', 'くび|首', 'をながくする', 'まちどおしくおもい、いまかいまかと まちわびる。'],
+    ['', 'め|目', 'がたかい', 'よい ものを みわける ちからが ある。'],
+    ['', 'みみ|耳', 'がいたい', '人から いわれる ことが つらくて、きくのが いやだ。'],
+    ['', 'くち|口', 'がかたい', 'ひみつを まもって、ほかの 人に いわない。'],
+    ['', 'かお|顔', 'がひろい', 'しっている 人が たくさん いる。'],
+    ['', 'て|手', 'がたりない', 'しごとを する 人が たりない。'],
+    ['', 'め|目', 'がまわる', 'とても いそがしい。'],
+    ['', 'はら|腹', 'がたつ', 'おこる。'],
+    ['', 'あたま|頭', 'がいたい', 'こまって、なやむ。'],
+    ['', 'くび|首', 'をひねる', 'ふしぎに おもう。'],
+    ['', 'むね|胸', 'がおどる', 'うれしくて、わくわくする。'],
+    ['', 'かた|肩', 'をおとす', 'がっかりして、げんきが なくなる。'],
+    ['', 'うで|腕', 'をみがく', 'じょうずに なるように れんしゅうする。'],
+  ];
+
+  // Cac bo phan co the trong kho thanh ngu: [chu Han, hiragana], khong lap
+  static List<List<String>> bodyParts() {
+    final seen = <String>{};
+    final out = <List<String>>[];
+    for (final e in _idiomBank) {
+      final a = e[1].split('|');
+      if (a.length >= 2 && seen.add(a[1])) out.add([a[1], a[0]]);
+    }
+    return out;
+  }
+
+  // Cac cap tu trai nghia: [tu, cach doc]
+  static const List<List<String>> _hantaiPairs = [
+    ['大小', 'だいしょう'],
+    ['左右', 'さゆう'],
+    ['男女', 'だんじょ'],
+    ['上下', 'じょうげ'],
+  ];
+
+  static KokugoItem _hantaiItem(int no, List<String> pair) => KokugoItem(
+        label: _circ[no],
+        parts: [_b(pair[0], pair[1])],
+      );
+
   static List<KokugoLesson>? _cache;
 
   static List<KokugoLesson> samples(String kind) {
@@ -85,6 +203,15 @@ class KokugoEngine {
         KokugoItem(label: '③ア', parts: [_y('小', ['ちい']), _t('さい手')]),
         KokugoItem(label: '③イ', parts: [_y('小', ['こ']), _t('石')]),
         KokugoItem(label: '③ウ', parts: [_y('小', ['お']), _t('川')]),
+      ];
+      // dap an dung nhu sach: (1)右 ノ=1, (2)左 一=1, (3)女 一=3, (4)上 一ngan=2, (5)下 丶=3, (6)先 ノ=1
+      final strokeItems = <KokugoItem>[
+        _strokeItem(0, '右', 1, p: 1, a: 180),
+        _strokeItem(1, '左', 1, p: 1, a: -45),
+        _strokeItem(2, '女', 3, p: 1, a: -15),
+        _strokeItem(3, '上', 2, p: 1, a: -50),
+        _strokeItem(4, '下', 3, p: 1, a: -15),
+        _strokeItem(5, '先', 1, p: 0, a: -60),
       ];
       // moi bai mau chi 3 cau
       all = <KokugoLesson>[
@@ -114,6 +241,51 @@ class KokugoEngine {
             difficulty: n == 0 ? 1 : 2,
             items: yomiItems.sublist(n * 3, n * 3 + 3),
           ),
+        // ひつじゅん: 6 chu trong sach, chia 2 bai
+        for (var n = 0; n < 2; n++)
+          KokugoLesson(
+            id: 'HJ00${n + 1}',
+            title: {
+              'ja': 'ひつじゅん ${n + 1}',
+              'en': 'Stroke Order ${n + 1}',
+              'vi': 'Thứ tự nét ${n + 1}',
+            },
+            question: questionFor('hitsujun'),
+            kind: 'hitsujun',
+            difficulty: n == 0 ? 2 : 1,
+            items: strokeItems.sublist(n * 3, n * 3 + 3),
+          ),
+        // かんようく: 8 cau trong sach, chia 3 bai
+        for (var n = 0; n < 3; n++)
+          KokugoLesson(
+            id: 'IK00${n + 1}',
+            title: {
+              'ja': 'かんようく ${n + 1}',
+              'en': 'Idioms ${n + 1}',
+              'vi': 'Thành ngữ ${n + 1}',
+            },
+            question: questionFor('kanyou'),
+            kind: 'kanyou',
+            difficulty: n == 2 ? 1 : 2,
+            items: [
+              for (var i = n * 3; i < (n == 2 ? 8 : n * 3 + 3); i++)
+                _idiomItem(i, _idiomBank[i][0], _idiomBank[i][1], _idiomBank[i][2], _idiomBank[i][3]),
+            ],
+          ),
+        // はんたい: dung nhu sach (4 cap, bang chu 8 chu)
+        KokugoLesson(
+          id: 'HT001',
+          title: {
+            'ja': 'はんたいの いみの かん字 1',
+            'en': 'Opposite Kanji 1',
+            'vi': 'Chữ Hán trái nghĩa 1',
+          },
+          question: questionFor('hantai'),
+          kind: 'hantai',
+          difficulty: 2,
+          items: [for (var i = 0; i < _hantaiPairs.length; i++) _hantaiItem(i, _hantaiPairs[i])],
+          bank: const ['小', '右', '女', '下', '左', '大', '男', '上'],
+        ),
       ];
       _cache = all;
     }
@@ -273,6 +445,62 @@ class KokugoEngine {
     final title = {
       for (final e in baseNames[kind]!.entries) e.key: '${e.value} ✨',
     };
+    if (kind == 'hitsujun') {
+      // muc 1: chu it net, muc 2: den 5 net, muc 3: ca chu nhieu net; 2-4 cau tuy muc
+      final maxStrokes = lv == 1 ? 3 : (lv == 2 ? 5 : 6);
+      final pool = strokeKanjiUpTo(maxStrokes)..shuffle(r);
+      final count = lv == 1 ? 2 : (lv == 2 ? 3 : 4);
+      final pick = pool.take(count).toList();
+      return KokugoLesson(
+        id: id,
+        title: title,
+        question: questionFor('hitsujun'),
+        kind: 'hitsujun',
+        difficulty: lv,
+        isAutoGenerated: true,
+        items: [
+          for (var i = 0; i < pick.length; i++)
+            _strokeItem(i, pick[i], 1 + r.nextInt(kStrokeData[pick[i]]!.length)),
+        ],
+      );
+    }
+    if (kind == 'kanyou') {
+      final count = lv == 1 ? 2 : (lv == 2 ? 3 : 4);
+      final bank = List<List<String>>.from(_idiomBank)..shuffle(r);
+      // moi bai khong lap cung mot bo phan co the
+      final used = <String>{};
+      final pick = <List<String>>[];
+      for (final e in bank) {
+        final key = e[1].split('|').first;
+        if (used.add(key)) pick.add(e);
+        if (pick.length == count) break;
+      }
+      return KokugoLesson(
+        id: id,
+        title: title,
+        question: questionFor('kanyou'),
+        kind: 'kanyou',
+        difficulty: lv,
+        isAutoGenerated: true,
+        items: [for (var i = 0; i < pick.length; i++) _idiomItem(i, pick[i][0], pick[i][1], pick[i][2], pick[i][3])],
+      );
+    }
+    if (kind == 'hantai') {
+      final count = lv == 1 ? 2 : (lv == 2 ? 3 : 4);
+      final pairs = List<List<String>>.from(_hantaiPairs)..shuffle(r);
+      final use = pairs.take(count).toList();
+      final chars = <String>[for (final p in use) ...p[0].split('')]..shuffle(r);
+      return KokugoLesson(
+        id: id,
+        title: title,
+        question: questionFor('hantai'),
+        kind: 'hantai',
+        difficulty: lv,
+        isAutoGenerated: true,
+        items: [for (var i = 0; i < use.length; i++) _hantaiItem(i, use[i])],
+        bank: chars,
+      );
+    }
     if (kind == 'kaki') {
       final count = lv == 1 ? 2 : 3;
       final bank = List<List<String>>.from(_kakiBank)..shuffle(r);

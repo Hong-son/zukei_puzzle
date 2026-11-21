@@ -24,6 +24,27 @@ class KokugoMenuScreen extends StatelessWidget {
       'desc': {'ja': 'よみを ひらがなで かこう', 'en': 'Write the reading', 'vi': 'Viết cách đọc bằng hiragana'},
       'color': Color(0xFF26A69A),
     },
+    {
+      'kind': 'hitsujun',
+      'icon': '🖌️',
+      'name': {'ja': 'かん字の ひつじゅん', 'en': 'Stroke Order', 'vi': 'Thứ tự nét chữ Hán'},
+      'desc': {'ja': 'なんばん目に かくかな？', 'en': 'Which stroke is it?', 'vi': 'Mũi tên chỉ nét thứ mấy?'},
+      'color': Color(0xFFEF6C00),
+    },
+    {
+      'kind': 'hantai',
+      'icon': '↔️',
+      'name': {'ja': 'はんたいの いみ', 'en': 'Opposite Kanji', 'vi': 'Chữ Hán trái nghĩa'},
+      'desc': {'ja': 'かん字を くみあわせよう', 'en': 'Combine opposite kanji', 'vi': 'Ghép chữ trái nghĩa thành từ'},
+      'color': Color(0xFFAB47BC),
+    },
+    {
+      'kind': 'kanyou',
+      'icon': '👂',
+      'name': {'ja': 'かんようく', 'en': 'Idioms', 'vi': 'Thành ngữ'},
+      'desc': {'ja': 'からだの ことばを いれよう', 'en': 'Fill in the body part', 'vi': 'Điền từ chỉ bộ phận cơ thể'},
+      'color': Color(0xFF43A047),
+    },
   ];
 
   @override

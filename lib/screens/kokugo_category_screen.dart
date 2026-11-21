@@ -5,6 +5,9 @@ import '../services/locale_service.dart';
 import '../services/progress_service.dart';
 import '../services/kokugo_engine.dart';
 import 'kokugo_game_screen.dart';
+import 'kokugo_stroke_screen.dart';
+import 'kokugo_hantai_screen.dart';
+import 'kokugo_idiom_screen.dart';
 import 'kokugo_menu_screen.dart';
 
 class KokugoCategoryScreen extends StatelessWidget {
@@ -69,7 +72,12 @@ class KokugoCategoryScreen extends StatelessWidget {
                   trailing: const Icon(Icons.arrow_forward_ios),
                   onTap: () => Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (_) => KokugoGameScreen(lesson: lesson)),
+                    MaterialPageRoute(builder: (_) {
+                      if (lesson.kind == 'hitsujun') return KokugoStrokeScreen(lesson: lesson);
+                      if (lesson.kind == 'hantai') return KokugoHantaiScreen(lesson: lesson);
+                      if (lesson.kind == 'kanyou') return KokugoIdiomScreen(lesson: lesson);
+                      return KokugoGameScreen(lesson: lesson);
+                    }),
                   ),
                 ),
               );
