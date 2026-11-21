@@ -2,64 +2,25 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/reward_service.dart';
 import '../services/locale_service.dart';
-import 'category_screen.dart';
-import 'dice_menu_screen.dart';
-import 'pyramid_category_screen.dart';
-import 'calendar_category_screen.dart';
-import 'half_category_screen.dart';
-import 'dotsquare_category_screen.dart';
+import 'subject_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
-  static const List<Map<String, dynamic>> categories = [
+  static const List<Map<String, dynamic>> subjects = [
     {
-      'id': 'zukei_puzzle',
-      'icon': '🧩',
-      'name': {'ja': 'ずけいパズル', 'en': 'Shape Puzzle', 'vi': 'Xếp Hình'},
-      'desc': {'ja': 'ブロックを ならべよう', 'en': 'Arrange blocks', 'vi': 'Xếp khối'},
+      'id': 'sansu',
+      'icon': '🔢',
+      'name': {'ja': '算数', 'en': 'Math', 'vi': 'Toán (算数)'},
+      'desc': {'ja': 'パズル・さいころ・ずけい', 'en': 'Puzzles, dice, shapes', 'vi': 'Xếp hình, xúc xắc, hình học'},
       'color': Color(0xFF4CAF50),
-      'mode': 'draw_outline',
     },
     {
-      'id': 'dice',
-      'icon': '🎲',
-      'name': {'ja': 'さいころ', 'en': 'Dice', 'vi': 'Xúc xắc'},
-      'desc': {'ja': 'おりたたんで みよう', 'en': 'Fold the net', 'vi': 'Gấp hình khai triển'},
-      'color': Color(0xFFFF7043),
-      'mode': 'dice',
-    },
-    {
-      'id': 'pyramid',
-      'icon': '🧱',
-      'name': {'ja': 'かずの つみ木', 'en': 'Number Tower', 'vi': 'Tháp số'},
-      'desc': {'ja': 'たして うめよう', 'en': 'Add and fill in', 'vi': 'Cộng để điền số'},
-      'color': Color(0xFF8D6E63),
-      'mode': 'pyramid',
-    },
-    {
-      'id': 'calendar',
-      'icon': '📅',
-      'name': {'ja': 'カレンダー', 'en': 'Calendar', 'vi': 'Lịch'},
-      'desc': {'ja': '日ご・日まえ・日かん', 'en': 'Days after, before, between', 'vi': 'Tính ngày tháng'},
-      'color': Color(0xFF26A69A),
-      'mode': 'calendar',
-    },
-    {
-      'id': 'half',
-      'icon': '🎨',
-      'name': {'ja': 'はんぶんだけぬる', 'en': 'Paint Half', 'vi': 'Tô một nửa'},
-      'desc': {'ja': 'はんぶんの ひろさを みつけよう', 'en': 'Find the half-coloured squares', 'vi': 'Tìm hình tô đúng một nửa'},
-      'color': Color(0xFFAB47BC),
-      'mode': 'half',
-    },
-    {
-      'id': 'dotsquare',
-      'icon': '🔲',
-      'name': {'ja': 'ましかくは いくつ？', 'en': 'Count the Squares', 'vi': 'Đếm hình vuông'},
-      'desc': {'ja': 'てんを つないで かぞえよう', 'en': 'Join dots and count', 'vi': 'Nối điểm và đếm'},
-      'color': Color(0xFF42A5F5),
-      'mode': 'dotsquare',
+      'id': 'kokugo',
+      'icon': '📖',
+      'name': {'ja': '国語', 'en': 'Japanese', 'vi': 'Tiếng Nhật (国語)'},
+      'desc': {'ja': 'かん字を かいて よもう', 'en': 'Write and read kanji', 'vi': 'Viết và đọc chữ Hán'},
+      'color': Color(0xFF5C6BC0),
     },
   ];
 
@@ -116,10 +77,10 @@ class HomeScreen extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
             child: Text(
               lang == 'ja'
-                  ? 'どの もんだいを やりますか？'
+                  ? 'どの きょうかを やりますか？'
                   : lang == 'en'
-                      ? 'Which problem do you want to try?'
-                      : 'Bạn muốn làm dạng bài nào?',
+                      ? 'Which subject do you want to study?'
+                      : 'Bạn muốn học môn nào?',
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
           ),
@@ -127,38 +88,29 @@ class HomeScreen extends StatelessWidget {
             child: Align(
               alignment: Alignment.topCenter,
               child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 1000),
+                constraints: const BoxConstraints(maxWidth: 700),
                 child: GridView.builder(
                   padding: const EdgeInsets.all(16),
                   gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                    maxCrossAxisExtent: 220,
+                    maxCrossAxisExtent: 320,
                     crossAxisSpacing: 16,
                     mainAxisSpacing: 16,
                     childAspectRatio: 1.0,
                   ),
-                  itemCount: categories.length,
+                  itemCount: subjects.length,
                   itemBuilder: (context, i) {
-                    final cat = categories[i];
+                    final sub = subjects[i];
                     return GestureDetector(
                       onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (_) => cat['mode'] == 'dice'
-                                ? DiceMenuScreen(category: cat)
-                                : cat['mode'] == 'pyramid'
-                                    ? PyramidCategoryScreen(category: cat)
-                                    : cat['mode'] == 'calendar'
-                                        ? CalendarCategoryScreen(category: cat)
-                                        : cat['mode'] == 'half'
-                                            ? HalfCategoryScreen(category: cat)
-                                            : cat['mode'] == 'dotsquare'
-                                                ? DotSquareCategoryScreen(category: cat)
-                                                : CategoryScreen(category: cat)),
+                          builder: (_) => SubjectScreen(subject: sub['id'] as String, info: sub),
+                        ),
                       ),
                       child: Container(
                         decoration: BoxDecoration(
-                          color: cat['color'] as Color,
-                          borderRadius: BorderRadius.circular(20),
+                          color: sub['color'] as Color,
+                          borderRadius: BorderRadius.circular(24),
                           boxShadow: [
                             BoxShadow(
                               color: Colors.black.withValues(alpha: 0.15),
@@ -170,23 +122,22 @@ class HomeScreen extends StatelessWidget {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text(cat['icon'] as String,
-                                style: const TextStyle(fontSize: 44)),
-                            const SizedBox(height: 8),
+                            Text(sub['icon'] as String, style: const TextStyle(fontSize: 64)),
+                            const SizedBox(height: 10),
                             Text(
-                              (cat['name'] as Map<String, String>)[lang] ?? '',
+                              (sub['name'] as Map<String, String>)[lang] ?? '',
                               style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white),
+                                  fontSize: 26, fontWeight: FontWeight.bold, color: Colors.white),
                               textAlign: TextAlign.center,
                             ),
-                            const SizedBox(height: 2),
-                            Text(
-                              (cat['desc'] as Map<String, String>)[lang] ?? '',
-                              style: const TextStyle(
-                                  fontSize: 11, color: Colors.white70),
-                              textAlign: TextAlign.center,
+                            const SizedBox(height: 4),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 12),
+                              child: Text(
+                                (sub['desc'] as Map<String, String>)[lang] ?? '',
+                                style: const TextStyle(fontSize: 12, color: Colors.white70),
+                                textAlign: TextAlign.center,
+                              ),
                             ),
                           ],
                         ),

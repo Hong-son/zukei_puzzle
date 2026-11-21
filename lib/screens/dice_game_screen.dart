@@ -73,7 +73,6 @@ class _DiceGameScreenState extends State<DiceGameScreen> {
     if (full.values.toSet().length < 6) {
       setState(() {
         _hintUnlocked = true;
-        _wrong = List.generate(l.hiddenIdx.length, (s) => s);
       });
       _snack(_msgDuplicate(lang));
       return;
@@ -91,7 +90,6 @@ class _DiceGameScreenState extends State<DiceGameScreen> {
     if (bad.isNotEmpty) {
       setState(() {
         _hintUnlocked = true;
-        _wrong = bad.toSet().toList();
       });
       _snack(_msgWrongOpposite(lang));
       return;

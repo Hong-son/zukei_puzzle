@@ -13,6 +13,7 @@ import '../models/pick_lesson.dart';
 import '../models/half_lesson.dart';
 import '../models/dotsquare_lesson.dart';
 import '../models/stack_lesson.dart';
+import '../models/kokugo_lesson.dart';
 
 class ProgressService extends ChangeNotifier {
   final Map<String, int> _completed = {};
@@ -28,6 +29,7 @@ class ProgressService extends ChangeNotifier {
   final List<HalfLesson> _generatedHalves = [];
   final List<DotSquareLesson> _generatedDotSquares = [];
   final List<StackLesson> _generatedStacks = [];
+  final List<KokugoLesson> _generatedKokugo = [];
 
   List<Lesson> get generated => List.unmodifiable(_generated);
   List<DiceLesson> get generatedDice => List.unmodifiable(_generatedDice);
@@ -41,6 +43,7 @@ class ProgressService extends ChangeNotifier {
   List<HalfLesson> get generatedHalves => List.unmodifiable(_generatedHalves);
   List<DotSquareLesson> get generatedDotSquares => List.unmodifiable(_generatedDotSquares);
   List<StackLesson> get generatedStacks => List.unmodifiable(_generatedStacks);
+  List<KokugoLesson> get generatedKokugo => List.unmodifiable(_generatedKokugo);
   int completions(String lessonId) => _completed[lessonId] ?? 0;
   bool isDone(String lessonId) => completions(lessonId) > 0;
 
@@ -76,6 +79,7 @@ class ProgressService extends ChangeNotifier {
     _loadList(prefs, 'generated_halves', _generatedHalves, HalfLesson.fromJson);
     _loadList(prefs, 'generated_dotsquares', _generatedDotSquares, DotSquareLesson.fromJson);
     _loadList(prefs, 'generated_stacks', _generatedStacks, StackLesson.fromJson);
+    _loadList(prefs, 'generated_kokugo', _generatedKokugo, KokugoLesson.fromJson);
     _loadList(prefs, 'generated_pyramids', _generatedPyramids, PyramidLesson.fromJson);
     _loadList(prefs, 'generated_calendars', _generatedCalendars, CalendarLesson.fromJson);
     // du lieu cu co the co nhieu bai tu sinh: chi giu bai moi nhat
@@ -89,6 +93,13 @@ class ProgressService extends ChangeNotifier {
     ]) {
       keepLast(l);
     }
+    final lastKokugo = <String, KokugoLesson>{};
+    for (final e in _generatedKokugo) {
+      lastKokugo[e.kind] = e;
+    }
+    _generatedKokugo
+      ..clear()
+      ..addAll(lastKokugo.values);
     final lastByKind = <String, StackLesson>{};
     for (final e in _generatedStacks) {
       lastByKind[e.kind] = e;
@@ -112,6 +123,7 @@ class ProgressService extends ChangeNotifier {
     await prefs.setString('generated_halves', jsonEncode(_generatedHalves.map((l) => l.toJson()).toList()));
     await prefs.setString('generated_dotsquares', jsonEncode(_generatedDotSquares.map((l) => l.toJson()).toList()));
     await prefs.setString('generated_stacks', jsonEncode(_generatedStacks.map((l) => l.toJson()).toList()));
+    await prefs.setString('generated_kokugo', jsonEncode(_generatedKokugo.map((l) => l.toJson()).toList()));
     await prefs.setString('generated_pyramids', jsonEncode(_generatedPyramids.map((l) => l.toJson()).toList()));
     await prefs.setString('generated_calendars', jsonEncode(_generatedCalendars.map((l) => l.toJson()).toList()));
   }
@@ -205,6 +217,13 @@ class ProgressService extends ChangeNotifier {
   Future<void> addGeneratedStack(StackLesson l) async {
     _generatedStacks.removeWhere((e) => e.kind == l.kind); // moi dang chi giu 1 bai tu sinh
     _generatedStacks.add(l);
+    await _save();
+    notifyListeners();
+  }
+
+  Future<void> addGeneratedKokugo(KokugoLesson l) async {
+    _generatedKokugo.removeWhere((e) => e.kind == l.kind); // moi dang chi giu 1 bai tu sinh
+    _generatedKokugo.add(l);
     await _save();
     notifyListeners();
   }

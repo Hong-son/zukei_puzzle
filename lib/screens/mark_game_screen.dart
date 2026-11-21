@@ -113,7 +113,6 @@ class _MarkGameScreenState extends State<MarkGameScreen> {
     }
     setState(() {
       _hintUnlocked = true;
-      _wrong = {...missing, ...wrong};
       _clearHint();
     });
     if (wrong.isEmpty) {

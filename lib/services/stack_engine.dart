@@ -402,7 +402,8 @@ class StackEngine {
     String ask = 'around';
 
     if (kind == 'stack') {
-      final n = lv == 1 ? 2 : (lv == 2 ? 3 : 2 + rng.nextInt(3));
+      // bai tu sinh: so tang tang theo do kho (bai mau thi theo dung sach: 2 tang)
+      final int n = lv == 1 ? 2 : (lv == 2 ? 3 : 2 + rng.nextInt(3));
       cells = [
         for (int z = 0; z < n; z++) [0, 0, z]
       ];
@@ -547,20 +548,14 @@ class StackEngine {
     var all = _samplesCache;
     if (all == null) {
       all = <StackLesson>[
-        // ---- stack: sach trang 1
+        // Cac bai mau duoi day bam theo 4 to bai tap (moi to 4 bai).
         _sample(
           id: 'ST001',
           kind: 'stack',
           number: 1,
           ask: 'around',
-          cells: [
-            [0, 0, 0],
-            [0, 0, 1]
-          ],
-          faces: [
-            [1, 3, 5],
-            [4, 6, 2]
-          ],
+          cells: [[0, 0, 0], [0, 0, 1]],
+          faces: [[1, 2, 3], [1, 2, 3]],
           covered: _noStickers(2),
           difficulty: 1,
         ),
@@ -569,52 +564,38 @@ class StackEngine {
           kind: 'stack',
           number: 2,
           ask: 'around',
-          cells: [
-            [0, 0, 0],
-            [0, 0, 1]
-          ],
-          faces: [
-            [4, 2, 1],
-            [5, 3, 6]
-          ],
-          covered: [
-            [false, true, false],
-            [false, false, true]
-          ],
-          difficulty: 2,
+          cells: [[0, 0, 0], [0, 0, 1]],
+          faces: [[3, 2, 6], [3, 2, 6]],
+          covered: _noStickers(2),
+          difficulty: 1,
         ),
         _sample(
           id: 'ST003',
           kind: 'stack',
           number: 3,
           ask: 'around',
-          cells: [
-            [0, 0, 0],
-            [0, 0, 1],
-            [0, 0, 2]
-          ],
-          faces: [
-            [5, 6, 4],
-            [2, 1, 4],
-            [6, 3, 2]
-          ],
-          covered: [
-            [false, false, true],
-            [false, true, false],
-            [false, false, true]
-          ],
-          difficulty: 3,
+          cells: [[0, 0, 0], [0, 0, 1]],
+          faces: [[4, 2, 1], [5, 3, 6]],
+          covered: [[false, true, false], [false, false, true]],
+          difficulty: 2,
         ),
-        // ---- same: sach trang 2
+        _sample(
+          id: 'ST004',
+          kind: 'stack',
+          number: 4,
+          ask: 'around',
+          cells: [[0, 0, 0], [0, 0, 1]],
+          faces: [[1, 2, 3], [2, 1, 4]],
+          covered: [[false, true, true], [false, true, true]],
+          difficulty: 2,
+        ),
         _sample(
           id: 'SM001',
           kind: 'same',
           number: 1,
           ask: 'around',
-          cells: cellsFromHeights([
-            [3]
-          ]),
-          faces: _same(3, [3, 2, 6]),
+          cells: cellsFromHeights([[3]]),
+          faces: _same(3, [3, 5, 1]),
           covered: _noStickers(3),
           difficulty: 1,
         ),
@@ -623,196 +604,79 @@ class StackEngine {
           kind: 'same',
           number: 2,
           ask: 'around',
-          cells: cellsFromHeights([
-            [2, 2]
-          ]),
-          faces: _same(4, [4, 5, 6]),
+          cells: cellsFromHeights([[2, 2]]),
+          faces: _same(4, [3, 5, 1]),
           covered: _noStickers(4),
-          difficulty: 2,
+          difficulty: 1,
         ),
         _sample(
           id: 'SM003',
           kind: 'same',
           number: 3,
           ask: 'around',
-          cells: cellsFromHeights([
-            [1, 1],
-            [2, 1]
-          ]),
-          faces: _same(5, [1, 2, 3]),
+          cells: cellsFromHeights([[1, 2]]),
+          faces: _same(3, [3, 5, 1]),
+          covered: _noStickers(3),
+          difficulty: 1,
+        ),
+        _sample(
+          id: 'SM004',
+          kind: 'same',
+          number: 4,
+          ask: 'around',
+          cells: cellsFromHeights([[2, 2, 1]]),
+          faces: _same(5, [3, 5, 1]),
           covered: _noStickers(5),
           difficulty: 2,
         ),
-        // ---- line: sach trang 3
         _sample(
           id: 'LN001',
           kind: 'line',
           number: 1,
           ask: 'left',
-          cells: [
-            [0, 0, 0],
-            [1, 0, 0]
-          ],
-          faces: [
-            [1, 4, 2],
-            [6, 4, 5]
-          ],
-          covered: [
-            [false, true, false],
-            [false, false, false]
-          ],
+          cells: [[0, 0, 0], [1, 0, 0]],
+          faces: [[1, 4, 2], [1, 3, 5]],
+          covered: [[false, false, false], [false, true, false]],
           difficulty: 1,
         ),
         _sample(
           id: 'LN002',
           kind: 'line',
           number: 2,
-          ask: 'around',
-          cells: [
-            [0, 0, 0],
-            [1, 0, 0],
-            [2, 0, 0]
-          ],
-          faces: [
-            [1, 3, 5],
-            [3, 1, 2],
-            [6, 4, 5]
-          ],
-          covered: [
-            [false, true, false],
-            [false, true, false],
-            [false, true, false]
-          ],
-          difficulty: 2,
+          ask: 'left',
+          cells: [[0, 0, 0], [1, 0, 0]],
+          faces: [[1, 2, 3], [1, 5, 4]],
+          covered: [[false, true, false], [true, false, false]],
+          difficulty: 1,
         ),
         _sample(
           id: 'LN003',
           kind: 'line',
           number: 3,
           ask: 'left',
-          cells: [
-            [0, 0, 0],
-            [1, 0, 0],
-            [2, 0, 0],
-            [3, 0, 0],
-            [4, 0, 0]
-          ],
-          faces: [
-            [1, 2, 3],
-            [2, 1, 4],
-            [6, 5, 3],
-            [5, 6, 4],
-            [5, 1, 3]
-          ],
-          covered: [
-            [false, true, false],
-            [false, true, false],
-            [false, true, false],
-            [false, true, false],
-            [false, true, false]
-          ],
+          cells: [[0, 0, 0], [1, 0, 0], [2, 0, 0], [3, 0, 0], [4, 0, 0]],
+          faces: [[1, 3, 5], [4, 6, 2], [1, 3, 5], [3, 1, 2], [1, 3, 5]],
+          covered: [[false, true, false], [false, true, false], [false, true, false], [false, true, false], [false, true, false]],
           difficulty: 3,
         ),
         _sample(
           id: 'LN004',
           kind: 'line',
           number: 4,
-          ask: 'left',
-          cells: [
-            [0, 0, 0],
-            [1, 0, 0]
-          ],
-          faces: [
-            [1, 4, 2],
-            [3, 6, 5]
-          ],
-          covered: [
-            [false, false, false],
-            [false, true, false]
-          ],
-          difficulty: 1,
-        ),
-        _sample(
-          id: 'LN005',
-          kind: 'line',
-          number: 5,
-          ask: 'left',
-          cells: [
-            [0, 0, 0],
-            [1, 0, 0]
-          ],
-          faces: [
-            [3, 5, 1],
-            [2, 4, 6]
-          ],
-          covered: [
-            [false, true, false],
-            [false, false, false]
-          ],
-          difficulty: 1,
-        ),
-        _sample(
-          id: 'LN006',
-          kind: 'line',
-          number: 6,
-          ask: 'left',
-          cells: [
-            [0, 0, 0],
-            [1, 0, 0],
-            [2, 0, 0],
-            [3, 0, 0],
-            [4, 0, 0]
-          ],
-          faces: [
-            [1, 5, 4],
-            [2, 6, 3],
-            [2, 1, 4],
-            [5, 1, 3],
-            [6, 2, 4]
-          ],
-          covered: [
-            [false, true, false],
-            [false, true, false],
-            [false, true, false],
-            [false, true, false],
-            [false, true, false]
-          ],
-          difficulty: 3,
-        ),
-        _sample(
-          id: 'LN007',
-          kind: 'line',
-          number: 7,
           ask: 'around',
-          cells: [
-            [0, 0, 0],
-            [1, 0, 0],
-            [2, 0, 0]
-          ],
-          faces: [
-            [1, 2, 3],
-            [2, 1, 4],
-            [6, 5, 3]
-          ],
-          covered: [
-            [false, true, false],
-            [false, true, false],
-            [false, true, false]
-          ],
+          cells: [[0, 0, 0], [1, 0, 0], [2, 0, 0]],
+          faces: [[1, 2, 3], [2, 1, 4], [6, 5, 3]],
+          covered: [[false, true, false], [false, true, false], [false, true, false]],
           difficulty: 2,
         ),
-        // ---- around: sach trang 4
         _sample(
           id: 'AR001',
           kind: 'around',
           number: 1,
           ask: 'around',
-          cells: cellsFromHeights([
-            [1, 1],
-            [2, 1]
-          ]),
-          faces: _same(5, [1, 3, 5]),
-          covered: _noStickers(5),
+          cells: cellsFromHeights([[2, 1, 3]]),
+          faces: _same(6, [1, 2, 3]),
+          covered: _noStickers(6),
           difficulty: 1,
         ),
         _sample(
@@ -820,62 +684,27 @@ class StackEngine {
           kind: 'around',
           number: 2,
           ask: 'around',
-          cells: cellsFromHeights([
-            [2, 1, 1],
-            [3, 2, 1]
-          ]),
-          faces: _same(10, [1, 2, 3]),
-          covered: _noStickers(10),
-          difficulty: 3,
+          cells: cellsFromHeights([[0, 1, 0], [1, 1, 2]]),
+          faces: _same(5, [1, 2, 3]),
+          covered: _noStickers(5),
+          difficulty: 2,
         ),
         _sample(
           id: 'AR003',
           kind: 'around',
           number: 3,
           ask: 'around',
-          cells: cellsFromHeights([
-            [2, 1, 3]
-          ]),
+          cells: cellsFromHeights([[1, 2], [2, 1]]),
           faces: _same(6, [1, 2, 3]),
           covered: _noStickers(6),
-          difficulty: 1,
+          difficulty: 2,
         ),
         _sample(
           id: 'AR004',
           kind: 'around',
           number: 4,
           ask: 'around',
-          cells: cellsFromHeights([
-            [0, 1, 0],
-            [1, 1, 2]
-          ]),
-          faces: _same(5, [1, 2, 3]),
-          covered: _noStickers(5),
-          difficulty: 2,
-        ),
-        _sample(
-          id: 'AR005',
-          kind: 'around',
-          number: 5,
-          ask: 'around',
-          cells: cellsFromHeights([
-            [1, 1],
-            [2, 2]
-          ]),
-          faces: _same(6, [1, 2, 3]),
-          covered: _noStickers(6),
-          difficulty: 2,
-        ),
-        _sample(
-          id: 'AR006',
-          kind: 'around',
-          number: 6,
-          ask: 'around',
-          cells: cellsFromHeights([
-            [1, 1, 1],
-            [1, 1, 1],
-            [2, 1, 1]
-          ]),
+          cells: cellsFromHeights([[1, 1, 1], [1, 0, 1], [2, 1, 2]]),
           faces: _same(10, [1, 2, 3]),
           covered: _noStickers(10),
           difficulty: 3,

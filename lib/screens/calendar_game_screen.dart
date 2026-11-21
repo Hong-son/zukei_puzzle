@@ -177,7 +177,6 @@ class _CalendarGameScreenState extends State<CalendarGameScreen> {
     }
     setState(() {
       _hintUnlocked = true;
-      _wrong = wrong;
       _hintText = '';
       _hintQ = null;
       _hintSlot = null;
@@ -185,12 +184,11 @@ class _CalendarGameScreenState extends State<CalendarGameScreen> {
     if (empty && kinds.isEmpty) {
       _snack(lang == 'ja' ? 'まだ かいていない ところが あるよ' : lang == 'en' ? 'Some boxes are still empty' : 'Còn ô chưa điền');
     } else {
-      final names = kinds.map((k) => _slotName(k, lang)).join(', ');
       _snack(lang == 'ja'
-          ? 'ちがう ところが あるよ（$names）。つきの おわりを こえるか かんがえよう'
+          ? 'ちがう ところが あるよ。つきの おわりを こえるか かんがえよう'
           : lang == 'en'
-              ? 'Some answers are wrong ($names). Check whether you cross the end of a month'
-              : 'Có ô sai ($names). Hãy xem có vượt qua cuối tháng không');
+              ? 'Some answers are wrong. Check whether you cross the end of a month'
+              : 'Có ô sai. Hãy xem có vượt qua cuối tháng không');
     }
   }
 

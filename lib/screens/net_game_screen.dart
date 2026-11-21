@@ -67,7 +67,6 @@ class _NetGameScreenState extends State<NetGameScreen> {
     }
     setState(() {
       _hintUnlocked = true;
-      _wrong = [...missed, ...extra];
     });
     if (extra.isNotEmpty) {
       _snack(lang == 'ja'

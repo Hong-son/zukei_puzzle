@@ -157,7 +157,6 @@ class _DotSquareGameScreenState extends State<DotSquareGameScreen> {
       return;
     }
     setState(() {
-      _wrong = wrong;
       _hintUnlocked = true;
       _hintText = '';
       _hintSq = null;

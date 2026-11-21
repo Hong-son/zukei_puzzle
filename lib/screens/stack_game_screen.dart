@@ -202,7 +202,7 @@ class _StackGameScreenState extends State<StackGameScreen> {
                     cells: l.cells,
                     faces: l.faces,
                     covered: l.covered,
-                    showLeft: l.kind == 'line',
+                    showLeft: l.kind == 'line' && l.ask == 'left',
                     leftLabel: leftLabel,
                   ),
                 );

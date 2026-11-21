@@ -182,7 +182,6 @@ class _PyramidGameScreenState extends State<PyramidGameScreen> {
   void _fail(String code, Set<String> bad, String lang) {
     setState(() {
       _hintUnlocked = true;
-      _wrong = bad;
       _hintKey = null;
       _hintText = '';
     });
@@ -192,7 +191,7 @@ class _PyramidGameScreenState extends State<PyramidGameScreen> {
         m = lang == 'ja' ? 'まだ かいていない ますが あるよ' : lang == 'en' ? 'Some blocks are still empty' : 'Còn ô chưa điền';
         break;
       case 'sum':
-        m = lang == 'ja' ? 'となりの 2つを たした かずが 上の ますと ちがうよ（あかい ます）' : lang == 'en' ? 'Two neighbours do not add up to the block above (red blocks)' : 'Có ô không bằng tổng hai ô bên dưới (các ô đỏ)';
+        m = lang == 'ja' ? 'となりの 2つを たした かずが 上の ますと ちがうよ' : lang == 'en' ? 'Two neighbours do not add up to the block above' : 'Có ô không bằng tổng hai ô bên dưới';
         break;
       case 'zero':
         m = lang == 'ja' ? '0は つかえないよ' : lang == 'en' ? '0 is not allowed' : 'Không được dùng số 0';

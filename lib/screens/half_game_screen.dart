@@ -77,7 +77,6 @@ class _HalfGameScreenState extends State<HalfGameScreen> {
       return;
     }
     setState(() {
-      _wrong = extra;
       _hintUnlocked = true;
       _hintIdx = null;
       _hintText = '';
@@ -85,10 +84,10 @@ class _HalfGameScreenState extends State<HalfGameScreen> {
     final parts = <String>[];
     if (extra.isNotEmpty) {
       parts.add(lang == 'ja'
-          ? 'はんぶん ではない ずに ○が ついているよ（あかい わく）'
+          ? 'はんぶん ではない ずに ○が ついているよ'
           : lang == 'en'
-              ? 'Some marked patterns are not exactly half (red frames)'
-              : 'Có hình được đánh dấu nhưng không phải một nửa (khung đỏ)');
+              ? 'Some marked patterns are not exactly half'
+              : 'Có hình được đánh dấu nhưng không phải một nửa');
     }
     if (missing.isNotEmpty) {
       parts.add(lang == 'ja'

@@ -261,7 +261,7 @@ class _DrawOutlineGameScreenState extends State<DrawOutlineGameScreen> {
       );
     } else {
       if (!_hintUnlocked) _hintUnlocked = true;
-      setState(() => _badCells = res.badCells);
+      setState(() {});
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(_msg(res.message, lang)),
         backgroundColor: Colors.orange,
