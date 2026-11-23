@@ -172,6 +172,61 @@ class KokugoEngine {
     ['上下', 'じょうげ'],
   ];
 
+  // Kho tu ghep tu hai chu Han trai nghia: [tu, cach doc, muc]
+  // muc 1: chu hoc o lop 1-2, muc 2: chu quen thuoc hon, muc 3: tu kho hon
+  static const List<List<String>> _hantaiPool = [
+    ['大小', 'だいしょう', '1'], ['上下', 'じょうげ', '1'], ['左右', 'さゆう', '1'], ['男女', 'だんじょ', '1'],
+    ['前後', 'ぜんご', '1'], ['内外', 'ないがい', '1'], ['天地', 'てんち', '1'], ['東西', 'とうざい', '1'],
+    ['南北', 'なんぼく', '1'], ['昼夜', 'ちゅうや', '1'], ['多少', 'たしょう', '1'], ['強弱', 'きょうじゃく', '1'],
+    ['古今', 'ここん', '1'], ['売買', 'ばいばい', '1'], ['朝夕', 'ちょうせき', '1'],
+    ['長短', 'ちょうたん', '2'], ['高低', 'こうてい', '2'], ['明暗', 'めいあん', '2'], ['新旧', 'しんきゅう', '2'],
+    ['遠近', 'えんきん', '2'], ['寒暖', 'かんだん', '2'], ['進退', 'しんたい', '2'], ['開閉', 'かいへい', '2'],
+    ['増減', 'ぞうげん', '2'], ['貸借', 'たいしゃく', '2'], ['老若', 'ろうにゃく', '2'], ['苦楽', 'くらく', '2'],
+    ['公私', 'こうし', '2'], ['生死', 'せいし', '2'], ['表裏', 'ひょうり', '2'], ['勝敗', 'しょうはい', '2'],
+    ['損得', 'そんとく', '2'], ['善悪', 'ぜんあく', '2'], ['主従', 'しゅじゅう', '2'], ['縦横', 'じゅうおう', '2'],
+    ['伸縮', 'しんしゅく', '2'], ['難易', 'なんい', '2'], ['往復', 'おうふく', '2'],
+    ['賛否', 'さんぴ', '3'], ['貧富', 'ひんぷ', '3'], ['乾湿', 'かんしつ', '3'], ['軽重', 'けいじゅう', '3'],
+    ['深浅', 'しんせん', '3'], ['広狭', 'こうきょう', '3'], ['真偽', 'しんぎ', '3'], ['正誤', 'せいご', '3'],
+    ['是非', 'ぜひ', '3'], ['有無', 'うむ', '3'], ['昇降', 'しょうこう', '3'], ['師弟', 'してい', '3'],
+    ['愛憎', 'あいぞう', '3'], ['吉凶', 'きっきょう', '3'], ['干満', 'かんまん', '3'], ['浮沈', 'ふちん', '3'],
+    ['攻守', 'こうしゅ', '3'], ['発着', 'はっちゃく', '3'], ['出欠', 'しゅっけつ', '3'], ['授受', 'じゅじゅ', '3'],
+    ['収支', 'しゅうし', '3'], ['緩急', 'かんきゅう', '3'], ['硬軟', 'こうなん', '3'], ['優劣', 'ゆうれつ', '3'],
+    ['美醜', 'びしゅう', '3'], ['巧拙', 'こうせつ', '3'], ['興亡', 'こうぼう', '3'], ['成否', 'せいひ', '3'],
+  ];
+
+  // Chon cac cap cho bai tu sinh: moi chu Han chi xuat hien mot lan trong bai,
+  // va hai chu khac cap khong ghep thanh mot tu khac trong kho (tranh nhieu dap an).
+  static List<List<String>> _pickHantai(Random r, int count, int lv) {
+    final known = <String>{for (final e in _hantaiPool) e[0]};
+    for (var attempt = 0; attempt < 300; attempt++) {
+      final cand = [for (final e in _hantaiPool) if (int.parse(e[2]) <= lv) e]..shuffle(r);
+      final chosen = <List<String>>[];
+      final used = <String>{};
+      for (final e in cand) {
+        final cs = e[0].split('');
+        if (cs.any(used.contains)) continue;
+        chosen.add(e);
+        used.addAll(cs);
+        if (chosen.length == count) break;
+      }
+      if (chosen.length < count) continue;
+      if (lv == 2 && !chosen.any((e) => e[2] == '2')) continue;
+      if (lv == 3 && chosen.where((e) => e[2] == '3').length < 2) continue;
+      final own = <String>{for (final e in chosen) e[0]};
+      final chars = used.toList();
+      var clash = false;
+      for (final a in chars) {
+        for (final b in chars) {
+          final w = a + b;
+          if (a != b && known.contains(w) && !own.contains(w)) clash = true;
+        }
+      }
+      if (clash) continue;
+      return chosen;
+    }
+    return _hantaiPairs.take(count).toList();
+  }
+
   static KokugoItem _hantaiItem(int no, List<String> pair) => KokugoItem(
         label: _circ[no],
         parts: [_b(pair[0], pair[1])],
@@ -487,8 +542,7 @@ class KokugoEngine {
     }
     if (kind == 'hantai') {
       final count = lv == 1 ? 2 : (lv == 2 ? 3 : 4);
-      final pairs = List<List<String>>.from(_hantaiPairs)..shuffle(r);
-      final use = pairs.take(count).toList();
+      final use = _pickHantai(r, count, lv);
       final chars = <String>[for (final p in use) ...p[0].split('')]..shuffle(r);
       return KokugoLesson(
         id: id,

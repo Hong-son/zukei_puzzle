@@ -24,6 +24,27 @@ class ViewMenuScreen extends StatelessWidget {
       'desc': {'ja': 'かげから ものを あてよう', 'en': 'Guess the object', 'vi': 'Đoán vật từ cái bóng'},
       'color': Color(0xFF6D4C41),
     },
+    {
+      'kind': 'box',
+      'icon': '📦',
+      'name': {'ja': 'とうめいな はこと ボール', 'en': 'Transparent Box and Balls', 'vi': 'Hộp trong suốt và quả bóng'},
+      'desc': {'ja': 'いろいろな むきから 見てみよう', 'en': 'See it from every side', 'vi': 'Nhìn từ nhiều hướng khác nhau'},
+      'color': Color(0xFF26A69A),
+    },
+    {
+      'kind': 'segbox',
+      'icon': '🔢',
+      'name': {'ja': 'とうめいな はこ', 'en': 'Transparent Box (Digits)', 'vi': 'Hộp trong suốt (chữ số)'},
+      'desc': {'ja': 'ぼうが すう字に 見えるよ', 'en': 'Bars that look like digits', 'vi': 'Các thanh tạo thành chữ số'},
+      'color': Color(0xFF3F7FD8),
+    },
+    {
+      'kind': 'blocks',
+      'icon': '🧱',
+      'name': {'ja': 'つみ木の おきかた', 'en': 'Stacking Blocks', 'vi': 'Cách xếp khối gỗ'},
+      'desc': {'ja': 'やじるしから 見える かずを かぞえよう', 'en': 'Count the blocks you can see', 'vi': 'Đếm số khối nhìn thấy'},
+      'color': Color(0xFF8E24AA),
+    },
   ];
 
   @override

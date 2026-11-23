@@ -512,7 +512,7 @@ void _paintGuide(Canvas canvas, Size size) {
 void _paintStrokes(Canvas canvas, Size size, List<List<Offset>> strokes) {
   final pen = Paint()
     ..color = Colors.black
-    ..strokeWidth = size.width / 13
+    ..strokeWidth = size.width / 26 // nua be day net cu (size/13)
     ..strokeCap = StrokeCap.round
     ..strokeJoin = StrokeJoin.round
     ..style = PaintingStyle.stroke;

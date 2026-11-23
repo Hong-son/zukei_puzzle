@@ -225,14 +225,20 @@ class _WaterGameScreenState extends State<WaterGameScreen> {
   }
 
   Widget _topCell(int i, int j, Map<String, dynamic> t, double size) {
-    final circles = (t['c'] as List).map((e) => (e as num).toDouble()).toList();
+    final lin = (t['lin'] as List?)?.map((e) => (e as num).toDouble()).toList();
+    final circles = ((t['c'] as List?) ?? const []).map((e) => (e as num).toDouble()).toList();
     final v = _ans[i][j];
     final hinted = _hinted.contains('$i-$j');
     return Column(mainAxisSize: MainAxisSize.min, children: [
       WaterTopView(
         circles: circles,
-        s0: (t['s0'] as num).toDouble(),
-        s1: (t['s1'] as num).toDouble(),
+        s0: ((t['s0'] as num?) ?? 0).toDouble(),
+        s1: ((t['s1'] as num?) ?? 0).toDouble(),
+        kinds: (t['k'] as String?) ?? '',
+        k0: (t['k0'] as String?) ?? 'o',
+        k1: (t['k1'] as String?) ?? 'o',
+        lin: lin,
+        x: ((t['x'] as num?) ?? 0).toDouble(),
         size: size,
       ),
       const SizedBox(height: 4),

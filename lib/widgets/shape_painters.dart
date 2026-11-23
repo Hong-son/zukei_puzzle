@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import '../services/view_shapes.dart';
 
@@ -123,18 +124,31 @@ class _ShadowPainter extends CustomPainter {
   bool shouldRepaint(covariant _ShadowPainter old) => old.obj != obj;
 }
 
-// Hinh nhin tu tren xuong: cac vong tron ban kinh (ti le so voi ban kinh binh = 1), to xam vanh [s0, s1]
+// Hinh nhin tu tren xuong: cac duong vien (ti le ban kinh so voi khung = 1), to xam vung nuoc.
+// kinds: hinh dang tung duong vien (o = tron, s = vuong, h = luc giac, t = tam giac), mac dinh la tron.
+// Vung nuoc la hinh k1 ban kinh s1 tru di hinh k0 ban kinh s0.
+// Be chua bac thang thang: lin = vi tri cac mep bac (ti le chieu rong), x = ti le chieu rong nuoc phu (dung khi lin != null).
 class WaterTopView extends StatelessWidget {
   final List<double> circles;
   final double s0;
   final double s1;
+  final String kinds;
+  final String k0;
+  final String k1;
+  final List<double>? lin;
+  final double x;
   final double size;
   final bool highlight;
   const WaterTopView({
     super.key,
-    required this.circles,
-    required this.s0,
-    required this.s1,
+    this.circles = const [],
+    this.s0 = 0,
+    this.s1 = 0,
+    this.kinds = '',
+    this.k0 = 'o',
+    this.k1 = 'o',
+    this.lin,
+    this.x = 0,
     this.size = 110,
     this.highlight = false,
   });
@@ -144,7 +158,7 @@ class WaterTopView extends StatelessWidget {
     return SizedBox(
       width: size,
       height: size,
-      child: CustomPaint(painter: _WaterPainter(circles, s0, s1)),
+      child: CustomPaint(painter: _WaterPainter(circles, s0, s1, kinds, k0, k1, lin, x)),
     );
   }
 }
@@ -153,7 +167,33 @@ class _WaterPainter extends CustomPainter {
   final List<double> circles;
   final double s0;
   final double s1;
-  _WaterPainter(this.circles, this.s0, this.s1);
+  final String kinds;
+  final String k0;
+  final String k1;
+  final List<double>? lin;
+  final double x;
+  _WaterPainter(this.circles, this.s0, this.s1, this.kinds, this.k0, this.k1, this.lin, this.x);
+
+  // Duong vien hinh dang kind, tam c, ban kinh ngoai tiep r
+  static Path _shape(String kind, Offset c, double r) {
+    if (kind == 's' || kind == 'h' || kind == 't') {
+      final n = kind == 's' ? 4 : (kind == 'h' ? 6 : 3);
+      final a0 = kind == 's' ? -pi / 4 : (kind == 'h' ? 0.0 : -pi / 2);
+      final p = Path();
+      for (var i = 0; i < n; i++) {
+        final a = a0 + 2 * pi * i / n;
+        final pt = Offset(c.dx + r * cos(a), c.dy + r * sin(a));
+        if (i == 0) {
+          p.moveTo(pt.dx, pt.dy);
+        } else {
+          p.lineTo(pt.dx, pt.dy);
+        }
+      }
+      p.close();
+      return p;
+    }
+    return Path()..addOval(Rect.fromCircle(center: c, radius: r));
+  }
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -162,21 +202,42 @@ class _WaterPainter extends CustomPainter {
     final water = Paint()
       ..color = const Color(0xFFD6DCE8)
       ..style = PaintingStyle.fill;
-    final shade = Path()
-      ..addOval(Rect.fromCircle(center: c, radius: s1 * R))
-      ..addOval(Rect.fromCircle(center: c, radius: s0 * R))
-      ..fillType = PathFillType.evenOdd;
-    canvas.drawPath(shade, water);
     final ink = Paint()
       ..color = const Color(0xFF444444)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = size.width * 0.022;
-    for (final r in circles) {
-      canvas.drawCircle(c, r * R, ink);
+      ..strokeWidth = size.width * 0.022
+      ..strokeJoin = StrokeJoin.round;
+
+    if (lin != null) {
+      final rect = Rect.fromLTRB(c.dx - R, c.dy - 0.62 * R, c.dx + R, c.dy + 0.62 * R);
+      canvas.drawRect(Rect.fromLTRB(rect.left, rect.top, rect.left + x * rect.width, rect.bottom), water);
+      for (final e in lin!) {
+        final px = rect.left + e * rect.width;
+        canvas.drawLine(Offset(px, rect.top), Offset(px, rect.bottom), ink);
+      }
+      canvas.drawRect(rect, ink);
+      return;
+    }
+
+    final shade = Path()
+      ..addPath(_shape(k1, c, s1 * R), Offset.zero)
+      ..addPath(_shape(k0, c, s0 * R), Offset.zero)
+      ..fillType = PathFillType.evenOdd;
+    canvas.drawPath(shade, water);
+    for (var i = 0; i < circles.length; i++) {
+      final kind = i < kinds.length ? kinds[i] : 'o';
+      canvas.drawPath(_shape(kind, c, circles[i] * R), ink);
     }
   }
 
   @override
   bool shouldRepaint(covariant _WaterPainter old) =>
-      old.s0 != s0 || old.s1 != s1 || old.circles.length != circles.length;
+      old.s0 != s0 ||
+      old.s1 != s1 ||
+      old.x != x ||
+      old.kinds != kinds ||
+      old.k0 != k0 ||
+      old.k1 != k1 ||
+      old.circles.length != circles.length ||
+      old.lin?.length != lin?.length;
 }

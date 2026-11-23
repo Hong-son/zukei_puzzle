@@ -6,6 +6,9 @@ import '../services/progress_service.dart';
 import '../services/view_engine.dart';
 import 'water_game_screen.dart';
 import 'shadow_game_screen.dart';
+import 'box_game_screen.dart';
+import 'blocks_game_screen.dart';
+import 'segbox_game_screen.dart';
 import 'view_menu_screen.dart';
 
 class ViewCategoryScreen extends StatelessWidget {
@@ -72,6 +75,9 @@ class ViewCategoryScreen extends StatelessWidget {
                     context,
                     MaterialPageRoute(builder: (_) {
                       if (lesson.kind == 'water') return WaterGameScreen(lesson: lesson);
+                      if (lesson.kind == 'box') return BoxGameScreen(lesson: lesson);
+                      if (lesson.kind == 'blocks') return BlocksGameScreen(lesson: lesson);
+                      if (lesson.kind == 'segbox') return SegBoxGameScreen(lesson: lesson);
                       return ShadowGameScreen(lesson: lesson);
                     }),
                   ),
