@@ -48,7 +48,7 @@ class _KokugoHantaiScreenState extends State<KokugoHantaiScreen> {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       content: Text(msg),
       backgroundColor: Colors.orange,
-      duration: const Duration(seconds: 3),
+      duration: const Duration(seconds: 5),
     ));
   }
 
@@ -121,11 +121,12 @@ class _KokugoHantaiScreenState extends State<KokugoHantaiScreen> {
     _tries++;
     final valid = _valid;
     final seen = <String>{};
-    var ok = true;
+    final bad = <String>[];
     for (var r = 0; r < _cells.length; r++) {
       final w = _cells[r][0] + _cells[r][1];
-      if (!valid.containsKey(w) || valid[w] != _read[r].trim() || !seen.add(w)) ok = false;
+      if (!valid.containsKey(w) || valid[w] != _read[r].trim() || !seen.add(w)) bad.add(KokugoEngine.circled(r));
     }
+    final ok = bad.isEmpty;
     if (ok) {
       final stars = RewardService.calcStars(_tries);
       final rs = context.read<RewardService>();
@@ -139,7 +140,7 @@ class _KokugoHantaiScreenState extends State<KokugoHantaiScreen> {
       );
       return;
     }
-    _snack(KokugoEngine.wrongMessage('hantai', lang));
+    _snack(KokugoEngine.withWrong(KokugoEngine.wrongMessage('hantai', lang), bad, lang));
   }
 
   void _onHint() {

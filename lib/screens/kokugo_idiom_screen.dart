@@ -35,7 +35,7 @@ class _KokugoIdiomScreenState extends State<KokugoIdiomScreen> {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       content: Text(msg),
       backgroundColor: Colors.orange,
-      duration: const Duration(seconds: 3),
+      duration: const Duration(seconds: 5),
     ));
   }
 
@@ -85,10 +85,11 @@ class _KokugoIdiomScreenState extends State<KokugoIdiomScreen> {
       return;
     }
     _tries++;
-    var ok = true;
+    final bad = <String>[];
     for (var i = 0; i < _ans.length; i++) {
-      if (!_isRight(i)) ok = false;
+      if (!_isRight(i)) bad.add(widget.lesson.items[i].label);
     }
+    final ok = bad.isEmpty;
     if (ok) {
       final stars = RewardService.calcStars(_tries);
       final rs = context.read<RewardService>();
@@ -102,7 +103,7 @@ class _KokugoIdiomScreenState extends State<KokugoIdiomScreen> {
       );
       return;
     }
-    _snack(KokugoEngine.wrongMessage('kanyou', lang));
+    _snack(KokugoEngine.withWrong(KokugoEngine.wrongMessage('kanyou', lang), bad, lang));
   }
 
   void _onHint() {

@@ -9,41 +9,72 @@ class KokugoMenuScreen extends StatelessWidget {
   final Map<String, dynamic> category;
   const KokugoMenuScreen({super.key, required this.category});
 
+  // Moi the tren menu la mot NHOM, co the chua nhieu dang bai giong nhau ('kinds').
+  // Moi bai hoc van giu 'kind' rieng cua no nen man hinh choi khong doi.
   static const List<Map<String, dynamic>> kinds = [
     {
-      'kind': 'kaki',
+      'id': 'kaki',
+      'kinds': ['kaki', 'doon'],
       'icon': '✍️',
       'name': {'ja': 'かん字を かこう', 'en': 'Write the Kanji', 'vi': 'Viết chữ Hán'},
-      'desc': {'ja': 'かたかなを かん字に なおそう', 'en': 'Katakana to kanji', 'vi': 'Đổi katakana thành chữ Hán'},
+      'desc': {
+        'ja': 'かたかな・おなじ おとの ことばを かん字に',
+        'en': 'Katakana / same-sound words to kanji',
+        'vi': 'Katakana / từ đồng âm → chữ Hán'
+      },
       'color': Color(0xFF5C6BC0),
     },
     {
-      'kind': 'yomi',
+      'id': 'yomi',
+      'kinds': ['yomi'],
       'icon': '🔤',
       'name': {'ja': 'かん字の よみ', 'en': 'Kanji Readings', 'vi': 'Cách đọc chữ Hán'},
       'desc': {'ja': 'よみを ひらがなで かこう', 'en': 'Write the reading', 'vi': 'Viết cách đọc bằng hiragana'},
       'color': Color(0xFF26A69A),
     },
     {
-      'kind': 'hitsujun',
+      'id': 'hitsujun',
+      'kinds': ['hitsujun'],
       'icon': '🖌️',
       'name': {'ja': 'かん字の ひつじゅん', 'en': 'Stroke Order', 'vi': 'Thứ tự nét chữ Hán'},
       'desc': {'ja': 'なんばん目に かくかな？', 'en': 'Which stroke is it?', 'vi': 'Mũi tên chỉ nét thứ mấy?'},
       'color': Color(0xFFEF6C00),
     },
     {
-      'kind': 'hantai',
+      'id': 'imi',
+      'kinds': ['hantai', 'ruigi'],
       'icon': '↔️',
-      'name': {'ja': 'はんたいの いみ', 'en': 'Opposite Kanji', 'vi': 'Chữ Hán trái nghĩa'},
-      'desc': {'ja': 'かん字を くみあわせよう', 'en': 'Combine opposite kanji', 'vi': 'Ghép chữ trái nghĩa thành từ'},
+      'name': {'ja': 'ことばの いみ', 'en': 'Word Meanings', 'vi': 'Nghĩa của từ'},
+      'desc': {
+        'ja': 'はんたいの いみ・にた いみ',
+        'en': 'Opposite & similar meanings',
+        'vi': 'Trái nghĩa & đồng nghĩa'
+      },
       'color': Color(0xFFAB47BC),
     },
     {
-      'kind': 'kanyou',
-      'icon': '👂',
-      'name': {'ja': 'かんようく', 'en': 'Idioms', 'vi': 'Thành ngữ'},
-      'desc': {'ja': 'からだの ことばを いれよう', 'en': 'Fill in the body part', 'vi': 'Điền từ chỉ bộ phận cơ thể'},
+      'id': 'ireru',
+      'kinds': ['kanyou', 'setsuzoku'],
+      'icon': '🧩',
+      'name': {'ja': 'ことばを いれよう', 'en': 'Fill in the Word', 'vi': 'Điền từ vào chỗ trống'},
+      'desc': {
+        'ja': 'かんようく・せつぞくの ことば',
+        'en': 'Idioms & conjunctions',
+        'vi': 'Thành ngữ & từ nối'
+      },
       'color': Color(0xFF43A047),
+    },
+    {
+      'id': 'narabe',
+      'kinds': ['narabe', 'bunsaku'],
+      'icon': '📝',
+      'name': {'ja': 'ぶんを つくろう', 'en': 'Build the Sentence', 'vi': 'Sắp xếp thành câu'},
+      'desc': {
+        'ja': 'ならべかえる・ことばを つかって かく',
+        'en': 'Reorder words / write with given words',
+        'vi': 'Xếp từ thành câu / đặt câu với từ cho sẵn'
+      },
+      'color': Color(0xFF1E88E5),
     },
   ];
 
@@ -85,17 +116,22 @@ class KokugoMenuScreen extends StatelessWidget {
                 itemCount: kinds.length,
                 itemBuilder: (context, i) {
                   final k = kinds[i];
-                  final kind = k['kind'] as String;
-                  final samples = KokugoEngine.samples(kind);
-                  final gen = progress.generatedKokugo.where((e) => e.kind == kind).toList();
-                  final total = samples.length + gen.length;
-                  final done = samples.where((s) => progress.isDone(s.id)).length +
-                      gen.where((s) => progress.isDone(s.id)).length;
+                  final ks = (k['kinds'] as List).cast<String>();
+                  var total = 0;
+                  var done = 0;
+                  for (final kd in ks) {
+                    final all = [
+                      ...KokugoEngine.samples(kd),
+                      ...progress.generatedKokugo.where((e) => e.kind == kd),
+                    ];
+                    total += all.length;
+                    done += all.where((s) => progress.isDone(s.id)).length;
+                  }
                   return GestureDetector(
                     onTap: () => Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => KokugoCategoryScreen(category: category, kind: kind),
+                        builder: (_) => KokugoCategoryScreen(category: category, tile: k),
                       ),
                     ),
                     child: Container(

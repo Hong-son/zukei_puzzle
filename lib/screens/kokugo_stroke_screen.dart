@@ -35,7 +35,7 @@ class _KokugoStrokeScreenState extends State<KokugoStrokeScreen> {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       content: Text(msg),
       backgroundColor: Colors.orange,
-      duration: const Duration(seconds: 3),
+      duration: const Duration(seconds: 5),
     ));
   }
 
@@ -53,10 +53,11 @@ class _KokugoStrokeScreenState extends State<KokugoStrokeScreen> {
       return;
     }
     _tries++;
-    var ok = true;
+    final bad = <String>[];
     for (var i = 0; i < items.length; i++) {
-      if (_ans[i] != _target(items[i])) ok = false;
+      if (_ans[i] != _target(items[i])) bad.add(items[i].label);
     }
+    final ok = bad.isEmpty;
     if (ok) {
       final stars = RewardService.calcStars(_tries);
       final rs = context.read<RewardService>();
@@ -70,7 +71,7 @@ class _KokugoStrokeScreenState extends State<KokugoStrokeScreen> {
       );
       return;
     }
-    _snack(KokugoEngine.wrongMessage('hitsujun', lang));
+    _snack(KokugoEngine.withWrong(KokugoEngine.wrongMessage('hitsujun', lang), bad, lang));
   }
 
   void _onHint() {

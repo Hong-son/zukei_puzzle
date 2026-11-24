@@ -9,6 +9,7 @@ import '../services/progress_service.dart';
 import '../services/kokugo_engine.dart';
 import '../widgets/hint_dialog.dart';
 import '../widgets/kana_pad.dart';
+import '../widgets/ruby_text.dart';
 import 'reward_screen.dart';
 
 // Man hinh choi 国語:
@@ -23,7 +24,7 @@ class KokugoGameScreen extends StatefulWidget {
 }
 
 class _KokugoGameScreenState extends State<KokugoGameScreen> {
-  bool get _isKaki => widget.lesson.kind == 'kaki';
+  bool get _isKaki => widget.lesson.kind == 'kaki' || widget.lesson.kind == 'doon';
 
   final Map<String, List<List<Offset>>> _strokes = {};
   late List<int> _mark; // kaki: 0 chua chon, 1 ○, 2 ✕ | yomi: 0 chua cham, 1 dung, 2 sai
@@ -292,7 +293,16 @@ class _KokugoGameScreenState extends State<KokugoGameScreen> {
       if (!part.blank) {
         children.add(Padding(
           padding: EdgeInsets.only(bottom: box / 2 - 12, left: 2, right: 2),
-          child: Text(part.text, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600)),
+          child: RubyText(
+            part.text,
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w600,
+              color: Colors.black87,
+              decoration: part.underline ? TextDecoration.underline : TextDecoration.none,
+              decorationThickness: 2,
+            ),
+          ),
         ));
         continue;
       }
