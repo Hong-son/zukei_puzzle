@@ -507,6 +507,14 @@ class KokugoEngine {
     ['', 'ようこさんは', ['まいにち', 'ていねいに'], ['はなに', 'みずを', 'あげます']],
   ];
 
+  // bunsaku: 4 cau trong sach (1)〜(4)
+  static const List<List<dynamic>> _bunBook = [
+    ['うれしい', 'はなす', ['うれしい できごとを おかあさんに はなしました。', 'ぼくは うれしくて、ともだちに はなしました。']],
+    ['こうふん', 'できる', ['しあいの まえは こうふんして、うまく できませんでした。', 'こうふんしても、おちついて できるように なりたい。']],
+    ['まんぞく', 'よろこばせる', ['おとうとを よろこばせる ことが できて、まんぞくしました。', 'みんなを よろこばせて、まんぞくした。']],
+    ['たのしみ', 'もうすぐ', ['もうすぐ えんそくで、とても たのしみです。', 'たのしみに していた たんじょうびが もうすぐ きます。']],
+  ];
+
   // bunsaku: [tu 1, tu 2, [cac cau mau]] (cau mau de tu cham ○✕)
   static const List<List<dynamic>> _bunPool = [
     ['たのしい', 'あそぶ', ['たのしい ゆうえんちで ともだちと あそびました。', 'あそぶと たのしいので、まいにち こうえんへ いきます。']],
@@ -826,24 +834,25 @@ class KokugoEngine {
                 shown: ['やくそくを', 'あそぶ', 'あした', 'しました', 'こうえんで', 'ともだちと', 'ぼくは']),
           ],
         ),
-        // ことばを つかって ぶんを つくろう: 本の 5 (1)〜(4) (cau mau la do ta soan de tu cham)
-        KokugoLesson(
-          id: 'BS001',
-          title: {
-            'ja': 'ことばを つかって ぶんを つくろう 1',
-            'en': 'Write a Sentence with the Words 1',
-            'vi': 'Đặt câu với từ cho sẵn 1',
-          },
-          question: questionFor('bunsaku'),
-          kind: 'bunsaku',
-          difficulty: 2,
-          items: [
-            _bunItem('(1)', 'うれしい', 'はなす', ['うれしい できごとを おかあさんに はなしました。', 'ぼくは うれしくて、ともだちに はなしました。']),
-            _bunItem('(2)', 'こうふん', 'できる', ['しあいの まえは こうふんして、うまく できませんでした。', 'こうふんしても、おちついて できるように なりたい。']),
-            _bunItem('(3)', 'まんぞく', 'よろこばせる', ['おとうとを よろこばせる ことが できて、まんぞくしました。', 'みんなを よろこばせて、まんぞくした。']),
-            _bunItem('(4)', 'たのしみ', 'もうすぐ', ['もうすぐ えんそくで、とても たのしみです。', 'たのしみに していた たんじょうびが もうすぐ きます。']),
-          ],
-        ),
+        // ことばを つかって ぶんを つくろう: 本の 5 (1)〜(4) を 2もんずつ 2つの 問題に わける
+        // (cau mau la do ta soan de tu cham)
+        for (var n = 0; n < 2; n++)
+          KokugoLesson(
+            id: 'BS00${n + 1}',
+            title: {
+              'ja': 'ことばを つかって ぶんを つくろう ${n + 1}',
+              'en': 'Write a Sentence with the Words ${n + 1}',
+              'vi': 'Đặt câu với từ cho sẵn ${n + 1}',
+            },
+            question: questionFor('bunsaku'),
+            kind: 'bunsaku',
+            difficulty: 2,
+            items: [
+              for (var i = 0; i < 2; i++)
+                _bunItem('(${n * 2 + i + 1})', _bunBook[n * 2 + i][0] as String, _bunBook[n * 2 + i][1] as String,
+                    (_bunBook[n * 2 + i][2] as List).cast<String>()),
+            ],
+          ),
         // はんたい: dung nhu sach (4 cap, bang chu 8 chu)
         KokugoLesson(
           id: 'HT001',
@@ -1054,7 +1063,7 @@ class KokugoEngine {
       );
     }
     if (kind == 'bunsaku') {
-      final count = lv == 1 ? 2 : 3;
+      const count = 2; // moi bai chi 2 cau cho de lam
       final pool = List<List<dynamic>>.from(_bunPool)..shuffle(r);
       return KokugoLesson(
         id: id,
