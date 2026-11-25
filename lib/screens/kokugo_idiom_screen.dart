@@ -7,6 +7,8 @@ import '../services/locale_service.dart';
 import '../services/progress_service.dart';
 import '../services/kokugo_engine.dart';
 import '../widgets/hint_dialog.dart';
+import '../widgets/word_comic.dart';
+import '../services/word_help.dart';
 import '../widgets/kana_pad.dart';
 import 'reward_screen.dart';
 
@@ -190,6 +192,14 @@ class _KokugoIdiomScreenState extends State<KokugoIdiomScreen> {
           child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
             _ToolBtn(icon: Icons.refresh, label: 'リセット', color: Colors.red, onTap: _onReset),
             _ToolBtn(icon: Icons.lightbulb, label: 'ヒント', color: Colors.amber, onTap: _onHint),
+            _ToolBtn(
+                icon: Icons.menu_book,
+                label: 'いみ',
+                color: Colors.teal,
+                onTap: () => showWordHelpDialog(
+                    context,
+                    [for (final it in widget.lesson.items) _helpEntry(it)],
+                    context.read<LocaleService>().lang)),
             ElevatedButton.icon(
               onPressed: _onCheck,
               icon: const Icon(Icons.check_circle, size: 18),
@@ -217,6 +227,23 @@ class _KokugoIdiomScreenState extends State<KokugoIdiomScreen> {
       Text(f, style: const TextStyle(fontSize: 14, color: Colors.black54, height: 1.1)),
       Text(a, style: style),
     ]);
+  }
+
+  // Muc giai thich cho 1 kan'you-ku: key = 'i:' + cach doc + phan sau cho trong
+  HelpEntry _helpEntry(KokugoItem it) {
+    final blank = it.firstBlank;
+    var after = '';
+    var seenBlank = false;
+    for (final p in it.parts) {
+      if (p.blank) {
+        seenBlank = true;
+      } else if (seenBlank) {
+        after += p.text;
+      }
+    }
+    final before = it.parts.takeWhile((p) => !p.blank).map((p) => p.text).join();
+    return HelpEntry('i:${blank.reads.first}$after',
+        title: '$before${blank.reads.last}$after', ja: (it.extra['m'] as String?) ?? '');
   }
 
   Widget _item(int i, KokugoItem it) {

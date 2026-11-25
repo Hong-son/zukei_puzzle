@@ -8,6 +8,8 @@ import '../services/locale_service.dart';
 import '../services/progress_service.dart';
 import '../services/kokugo_engine.dart';
 import '../widgets/hint_dialog.dart';
+import '../widgets/word_comic.dart';
+import '../services/word_help.dart';
 import 'reward_screen.dart';
 
 // ことばを つかって ぶんを つくろう: 2 tu cho san, tu viet cau bang tay (khong co dap an duy nhat).
@@ -67,7 +69,9 @@ class _KokugoBunScreenState extends State<KokugoBunScreen> {
           context: context,
           builder: (ctx) => AlertDialog(
             title: Text(lang == 'ja' ? 'ヒント' : (lang == 'en' ? 'Hint' : 'Gợi ý')),
-            content: SingleChildScrollView(
+            content: SizedBox(
+              width: 420,
+              child: SingleChildScrollView(
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [
                 Text(
                     lang == 'ja'
@@ -80,16 +84,17 @@ class _KokugoBunScreenState extends State<KokugoBunScreen> {
                 for (var i = 0; i < _items.length; i++)
                   if (!_locked[i]) ...[
                     Text(_items[i].label, style: const TextStyle(fontWeight: FontWeight.bold)),
-                    for (final w in _words(i)) ...[
-                      Text('「$w」', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                      Text(KokugoEngine.bunMeaning(w, lang), style: const TextStyle(fontSize: 16)),
-                      if (KokugoEngine.bunForms(w).length > 1)
-                        Text(
-                            '${lang == 'ja' ? 'かたち' : (lang == 'en' ? 'Forms' : 'Dạng khác')}: '
-                            '${KokugoEngine.bunForms(w).where((f) => f != w).join('・')}',
-                            style: const TextStyle(fontSize: 14, color: Colors.black54)),
-                      const SizedBox(height: 6),
-                    ],
+                    for (final w in _words(i))
+                      WordHelpCard(
+                        lang: lang,
+                        entry: HelpEntry(
+                          w,
+                          extra: KokugoEngine.bunForms(w).length > 1
+                              ? '${lang == 'ja' ? 'かたち' : (lang == 'en' ? 'Forms' : 'Dạng khác')}: '
+                                  '${KokugoEngine.bunForms(w).where((f) => f != w).join('・')}'
+                              : '',
+                        ),
+                      ),
                     const SizedBox(height: 4),
                   ],
                 const Divider(),
@@ -101,6 +106,7 @@ class _KokugoBunScreenState extends State<KokugoBunScreen> {
                             : 'Cách đặt câu\n① Ai (は)\n② Khi nào / ở đâu\n③ Làm gì (dùng từ cho sẵn)\n④ Cuối câu thêm 「。」',
                     style: const TextStyle(fontSize: 15)),
               ]),
+              ),
             ),
             actions: [TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('OK'))],
           ),

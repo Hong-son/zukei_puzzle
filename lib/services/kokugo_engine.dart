@@ -5,7 +5,7 @@ import 'stroke_data.dart';
 // Bai 国語 (lop 1): viet chu Han (kaki) va viet cach doc (yomi).
 // Kho tu vung va cau vi du do ta tu soan.
 class KokugoEngine {
-  static const List<String> kinds = ['kaki', 'yomi', 'hitsujun', 'hantai', 'kanyou', 'setsuzoku', 'doon', 'ruigi', 'narabe', 'bunsaku'];
+  static const List<String> kinds = ['kaki', 'yomi', 'hitsujun', 'hantai', 'kanyou', 'setsuzoku', 'doon', 'ruigi', 'narabe', 'bunsaku', 'shiji'];
 
   static const Map<String, Map<String, String>> baseNames = {
     'kaki': {'ja': 'かん字を かこう', 'en': 'Write the Kanji', 'vi': 'Viết chữ Hán'},
@@ -15,6 +15,7 @@ class KokugoEngine {
     'kanyou': {'ja': 'かんようく', 'en': 'Idioms', 'vi': 'Thành ngữ (bộ phận cơ thể)'},
     'setsuzoku': {'ja': 'あてはまる ことば', 'en': 'Fill in the Word', 'vi': 'Điền từ thích hợp'},
     'doon': {'ja': 'おなじ おとの かん字', 'en': 'Same-Sound Kanji', 'vi': 'Chữ Hán đồng âm'},
+    'shiji': {'ja': 'こそあど ことば', 'en': 'What Does It Point To?', 'vi': 'Từ chỉ thị (これ・それ…)'},
     'ruigi': {'ja': 'にた いみの ことば', 'en': 'Similar Words', 'vi': 'Từ đồng nghĩa'},
     'narabe': {'ja': 'ぶんを つくろう', 'en': 'Build the Sentence', 'vi': 'Sắp xếp thành câu'},
     'bunsaku': {'ja': 'ことばを つかって ぶんを つくろう', 'en': 'Write a Sentence with the Words', 'vi': 'Đặt câu với từ cho sẵn'},
@@ -59,6 +60,13 @@ class KokugoEngine {
         'ja': '──せんに あう かん字を □に かきましょう。',
         'en': 'Write the kanji that fits the underlined hiragana in each box.',
         'vi': 'Viết chữ Hán hợp với phần hiragana gạch chân vào ô.',
+      };
+    }
+    if (kind == 'shiji') {
+      return {
+        'ja': 'つぎの ──せんの こそあどことばは、なにを さしていますか。正しい ものの（　）に ○を かきましょう。',
+        'en': 'What does the underlined word (これ / それ / そこ …) point to? Put ○ in the parentheses of the correct choice.',
+        'vi': 'Từ gạch chân (これ・それ・そこ…) chỉ cái gì? Hãy đánh ○ vào dấu ngoặc ( ) của đáp án đúng.',
       };
     }
     if (kind == 'setsuzoku') {
@@ -119,6 +127,13 @@ class KokugoEngine {
           : lang == 'en'
               ? 'Something is wrong. Change the word order and read it to check it makes sense'
               : 'Có chỗ chưa đúng. Hãy thử đổi thứ tự từ rồi đọc lại xem câu có nghĩa không';
+    }
+    if (kind == 'shiji') {
+      return lang == 'ja'
+          ? 'ちがう ところが あるよ。こそあどことばの ところに えらんだ ことばを いれて よんでみよう'
+          : lang == 'en'
+              ? 'Something is wrong. Put your choice in place of the underlined word and read it again'
+              : 'Có chỗ chưa đúng. Hãy thay từ gạch chân bằng đáp án đã chọn rồi đọc lại';
     }
     if (kind == 'setsuzoku') {
       return lang == 'ja'
@@ -183,6 +198,47 @@ class KokugoEngine {
       if (after.isNotEmpty) _t(after),
     ]);
   }
+
+  // cau 'yomi' dang cau van: [[chu Han|cach doc]] la cho can viet cach doc.
+  // Moi cho tro thanh 1 cau hoi (ア イ ウ); cac chu Han con lai trong cau chi hien thi.
+  static List<KokugoItem> _yomiSentence(int no, String src) {
+    final re = RegExp(r'〔([^|〕]+)\|([^〕]+)〕');
+    final targets = re.allMatches(src).toList();
+    final items = <KokugoItem>[];
+    for (var t = 0; t < targets.length; t++) {
+      final parts = <KokugoPart>[];
+      var buf = '';
+      var last = 0;
+      for (var k = 0; k < targets.length; k++) {
+        final m = targets[k];
+        buf += src.substring(last, m.start);
+        if (k == t) {
+          if (buf.isNotEmpty) parts.add(_t(buf));
+          buf = '';
+          parts.add(_y(m.group(1)!, [m.group(2)!]));
+        } else {
+          buf += m.group(1)!;
+        }
+        last = m.end;
+      }
+      buf += src.substring(last);
+      if (buf.isNotEmpty) parts.add(_t(buf));
+      items.add(KokugoItem(label: '${_circ[no]}${_kana3[t]}', parts: parts));
+    }
+    return items;
+  }
+
+  // ページ3 (かん字の よみ: ──せんの かん字): 8 cau, moi cau la 1 bai
+  static const List<String> _yomiSent = [
+    '〔上|のぼ〕りの てん車は あと〔五|ご〕ふんで くる。',
+    '〔早生|はやう〕まれの〔人|ひと〕は、まだ〔六|ろく〕さいだ。',
+    '〔小学生|しょうがくせい〕が〔小|ちい〕さな こえで じぶんの〔名|な〕まえを いう。',
+    'わたしは、〔生|い〕け〔花|ばな〕を ならっている。',
+    '〔金|きん〕よう日に〔金|かな〕あみを かいに いった。',
+    'きれいな〔字|じ〕で〔上下|じょうげ〕 〔左右|さゆう〕と かく。',
+    '〔年中|ねんじゅう〕 はんそでを きている あの〔男|おとこ〕の子は、〔本|ほん〕とうに じょうぶだ。',
+    '〔花|か〕だんの まん〔中|なか〕に、きゅうこんを うえた。',
+  ];
 
   // cau 'hitsujun': ch = chu Han, n = net duoc chi, p = dau net (0/1/-1), a = goc mui ten
   // cau 'doon': [truoc, hiragana gach chan, sau, chu Han dap an]
@@ -382,6 +438,34 @@ class KokugoEngine {
     ['はるに なった。', 'そして', '、さくらが さいた。', 's'],
     ['あさ おきて かおを あらった。', 'それから', '、はを みがいた。', 's'],
     ['まず てを あらう。', 'それから', '、おやつを たべる。', 's'],
+    // --- ページ3: ぎたいご・ふくし (本の 3 (1)〜(6) の じゅんばん) ---
+    ['このところ、木のはも いろづき、', 'めっきり', 'あきらしく なってきた。', 'zめっきり'],
+    ['ともだちが、', 'こっそり', 'ないしょばなしを おしえてくれた。', 'zこっそり'],
+    ['としょかんの 本だなには、本が', 'ぎっしり', 'つまっている。', 'zぎっしり'],
+    ['日本ばれの 空に、ふじ山が', 'くっきり', '見えた。', 'zくっきり'],
+    ['おばあちゃんが、九州から', 'はるばる', 'あそびに きてくれた。', 'zはるばる'],
+    ['どうして こんな かんたんな けいさんを まちがえたのか', 'さっぱり', 'わからない。', 'zさっぱり'],
+    // --- じぶんで ふやした ぶん (じどう生成用) ---
+    ['いまは ちいさい ゆめだけれど、', 'ゆくゆく', 'せかいで かつやくしたい。', 'zゆくゆく'],
+    ['はしりつかれて、よるは', 'ぐっすり', 'ねむった。', 'zぐっすり'],
+    ['いそがずに、こうえんを', 'のんびり', 'さんぽした。', 'zのんびり'],
+    ['ともだちの ぼうしを', 'うっかり', 'まちがえて かぶって きてしまった。', 'zうっかり'],
+    ['あめが やんで、そらが', 'すっかり', 'はれた。', 'zすっかり'],
+    ['あぶないから、てを', 'しっかり', 'にぎって あるこう。', 'zしっかり'],
+    // --- ページ4 (本の 3 (1)〜(6) の じゅんばん) ---
+    ['かりた 本が', 'なかなか', '見つからない。', 'zなかなか'],
+    ['正ぎの みかたが', 'さっそうと', 'あらわれる。', 'zさっそうと'],
+    ['一ばんぼしが 出ると、', 'みるみる', '空が くらくなった。', 'zみるみる'],
+    ['犬に ほえられ', '一目さんに', 'にげた。', 'z一目さんに'],
+    ['おかあさんの かおを', 'まじまじと', '見る。', 'zまじまじと'],
+    ['きみが', 'もっとも', 'すきな たべものは なに？', 'zもっとも'],
+  ];
+
+  // ぎたいご・ふくし (adverb) -- 'z' loai cau
+  static const List<String> _advWords = [
+    'さっぱり', 'ぎっしり', 'くっきり', 'こっそり', 'めっきり', 'ゆくゆく', 'はるばる',
+    'ぐっすり', 'のんびり', 'うっかり', 'すっかり', 'しっかり',
+    'なかなか', 'さっそうと', 'みるみる', '一目さんに', 'まじまじと', 'もっとも',
   ];
 
   // Cac tu (ngoai dap an) cung hop voi cau thuoc loai nay -> khong duoc dung chung trong 1 bai
@@ -393,6 +477,25 @@ class KokugoEngine {
     'k': ['だから', 'それで', 'そして', 'それから'],
     'x': ['けれども', 'しかし', 'でも', 'ところが', 'そして', 'それから'],
     's': ['そして', 'それから'],
+    // ぎたいご: cung hop nghia voi cau thi them vao (ke ca chinh no)
+    'zめっきり': ['めっきり', 'すっかり', 'みるみる'],
+    'zこっそり': ['こっそり'],
+    'zぎっしり': ['ぎっしり'],
+    'zくっきり': ['くっきり', 'はっきり'],
+    'zはるばる': ['はるばる'],
+    'zさっぱり': ['さっぱり'],
+    'zゆくゆく': ['ゆくゆく'],
+    'zぐっすり': ['ぐっすり'],
+    'zのんびり': ['のんびり'],
+    'zうっかり': ['うっかり'],
+    'zすっかり': ['すっかり', 'めっきり', 'みるみる'],
+    'zなかなか': ['なかなか'],
+    'zさっそうと': ['さっそうと'],
+    'zみるみる': ['みるみる', 'めっきり', 'すっかり'],
+    'z一目さんに': ['一目さんに'],
+    'zまじまじと': ['まじまじと'],
+    'zもっとも': ['もっとも', 'なかなか'],
+    'zしっかり': ['しっかり'],
   };
 
   static const List<String> _setsuWords = [
@@ -507,12 +610,52 @@ class KokugoEngine {
     ['', 'ようこさんは', ['まいにち', 'ていねいに'], ['はなに', 'みずを', 'あげます']],
   ];
 
-  // bunsaku: 4 cau trong sach (1)〜(4)
+  // shiji (こそあど ことば): [truoc, tu chi thi (gach chan), sau, [3 lua chon], chi so dap an]
+  static const List<List<dynamic>> _shijiPool = [
+    ['ゆうたさんは あたらしい じてんしゃを かった。', 'それ', 'で まいにち がっこうに かよっている。', ['ゆうたさん', 'じてんしゃ', 'がっこう'], 1],
+    ['わたしは ほんやで おもしろい まんがを みつけた。', 'それ', 'を かって いえに かえった。', ['ほんや', 'まんが', 'いえ'], 1],
+    ['えきの まえに おおきな ケーキやが ある。', 'そこ', 'で いもうとの たんじょうびの ケーキを かった。', ['えき', 'ケーキや', 'たんじょうび'], 1],
+    ['せんせいが きょうしつに ちいさな はちうえを もって きた。', 'これ', 'は ひまわりの なえだと いう。', ['せんせい', 'きょうしつ', 'はちうえ'], 2],
+    ['おじいさんが かわで おおきな さかなを つった。', 'それ', 'を ばんごはんに たべた。', ['おじいさん', 'かわ', 'さかな'], 2],
+    ['ひろしくんは としょかんで れきしの ほんを かりた。', 'そこ', 'は しずかで よく べんきょうが できる。', ['ひろしくん', 'としょかん', 'ほん'], 1],
+    ['ねえさんが わたしに あかい マフラーを あんで くれた。', 'これ', 'を つけると とても あたたかい。', ['ねえさん', 'わたし', 'マフラー'], 2],
+    ['ともだちが ぼくに あたらしい ゲームを みせてくれた。', 'それ', 'は ぼくも ずっと ほしかった ものだ。', ['ともだち', 'ぼく', 'ゲーム'], 2],
+    ['あかちゃんが ベッドの うえで ぬいぐるみを だいていた。', 'それ', 'は おかあさんが かった ものだ。', ['あかちゃん', 'ベッド', 'ぬいぐるみ'], 2],
+  ];
+
+  static KokugoItem _shijiItem(String label, String pre, String pron, String post, List<String> opts, int ans) =>
+      KokugoItem(
+        label: label,
+        parts: [
+          if (pre.isNotEmpty) _t(pre),
+          KokugoPart(pron, underline: true),
+          if (post.isNotEmpty) _t(post),
+          KokugoPart('', blank: true, reads: [opts[ans]]),
+        ],
+        extra: {'opts': opts},
+      );
+
+  // bunsaku: cac cau trong sach (5 va 6, moi trang 4 cau)
   static const List<List<dynamic>> _bunBook = [
     ['うれしい', 'はなす', ['うれしい できごとを おかあさんに はなしました。', 'ぼくは うれしくて、ともだちに はなしました。']],
     ['こうふん', 'できる', ['しあいの まえは こうふんして、うまく できませんでした。', 'こうふんしても、おちついて できるように なりたい。']],
     ['まんぞく', 'よろこばせる', ['おとうとを よろこばせる ことが できて、まんぞくしました。', 'みんなを よろこばせて、まんぞくした。']],
     ['たのしみ', 'もうすぐ', ['もうすぐ えんそくで、とても たのしみです。', 'たのしみに していた たんじょうびが もうすぐ きます。']],
+    // 本の 6
+    ['はずかしい', 'ほめる', ['みんなの まえで ほめられて、はずかしかった。', 'ほめられて はずかしかったけれど、うれしかった。']],
+    ['もうしわけない', 'かんちがい', ['かんちがいして さきに かえって しまい、もうしわけない ことを しました。', 'かんちがいで めいわくを かけて、もうしわけなく おもいました。']],
+    ['うしろめたい', 'たからもの', ['ともだちの たからものを こわして、うしろめたい きもちだった。', 'たからものを かくして しまい、うしろめたく なった。']],
+    ['ふまん', 'うわさ', ['うわさを きいて、ふまんに おもった。', 'ふまんが あっても、うわさを しんじては いけません。']],
+    // 本の 7
+    ['おそろしい', 'きもだめし', ['きもだめしは おそろしくて、なきそうに なった。', 'おそろしい はなしを きいた あとの きもだめしは ドキドキした。']],
+    ['こころぼそい', 'はじめて', ['はじめて ひとりで ねたので、こころぼそかった。', 'はじめての ばしょは、こころぼそい きもちに なる。']],
+    ['なつかしい', 'しゃしん', ['むかしの しゃしんを みて、なつかしく なった。', 'なつかしい ともだちの しゃしんが でてきた。']],
+    ['はげましたい', 'おとうと', ['しあいに まけた おとうとを はげましたい。', 'おとうとが しょげて いたので、はげましたい と おもった。']],
+    // 本の 8
+    ['こんらん', 'せつめい', ['せつめいが むずかしくて、あたまが こんらんした。', 'こんらんして いる ともだちに、ゆっくり せつめいした。']],
+    ['まよう', 'かう', ['どの くつを かうか まよった。', 'ふたつの ほんで まよったけれど、あおい ほうを かいました。']],
+    ['うしろめたい', 'うそ', ['うそを ついて しまい、うしろめたい きもちに なった。', 'うそを ついた あとは、ずっと うしろめたかった。']],
+    ['ふしぎ', 'かいがい', ['かいがいの おみやげは、ふしぎな かたちを して いた。', 'かいがいで ふしぎな できごとに であった。']],
   ];
 
   // bunsaku: [tu 1, tu 2, [cac cau mau]] (cau mau de tu cham ○✕)
@@ -562,6 +705,27 @@ class KokugoEngine {
     'いそぐ': ['いそぐ', 'いそぎ', 'いそいで', 'いそいだ', 'いそが'],
     'はしる': ['はしる', 'はしり', 'はしって', 'はしった', 'はしら'],
     'まつ': ['まつ', 'まち', 'まって', 'まった'],
+    'ほめる': ['ほめる', 'ほめ', 'ほめて', 'ほめた', 'ほめら'],
+    'もうしわけない': ['もうしわけない', 'もうしわけなく', 'もうしわけなかった', 'もうしわけ'],
+    'かんちがい': ['かんちがい'],
+    'うしろめたい': ['うしろめたい', 'うしろめたく', 'うしろめたかった'],
+    'たからもの': ['たからもの'],
+    'ふまん': ['ふまん'],
+    'うわさ': ['うわさ'],
+    'おそろしい': ['おそろしい', 'おそろしく', 'おそろしかった', 'おそろしさ'],
+    'きもだめし': ['きもだめし'],
+    'こころぼそい': ['こころぼそい', 'こころぼそく', 'こころぼそかった'],
+    'はじめて': ['はじめて', 'はじめ'],
+    'なつかしい': ['なつかしい', 'なつかしく', 'なつかしかった', 'なつかしさ'],
+    'しゃしん': ['しゃしん'],
+    'はげましたい': ['はげましたい', 'はげます', 'はげまし', 'はげまして', 'はげました', 'はげまそ'],
+    'おとうと': ['おとうと'],
+    'こんらん': ['こんらん'],
+    'せつめい': ['せつめい'],
+    'かう': ['かう', 'かい', 'かっ', 'かわ', 'かお'],
+    'うそ': ['うそ'],
+    'ふしぎ': ['ふしぎ'],
+    'かいがい': ['かいがい'],
   };
 
   // bunsaku: nghia cua tu, giai thich de hieu cho tre (ja / en / vi)
@@ -595,6 +759,27 @@ class KokugoEngine {
     'いそぐ': {'ja': 'おくれないように、はやく しようと する こと。', 'en': 'To hurry so that you will not be late.', 'vi': 'Vội, làm nhanh để không bị trễ.'},
     'はしる': {'ja': 'あしを はやく うごかして すすむ こと。', 'en': 'To move fast on your feet.', 'vi': 'Chạy, di chuyển nhanh bằng chân.'},
     'まつ': {'ja': 'だれかが くる ことや、なにかが おこる ことを、そのまま いて まって いる こと。', 'en': 'To stay where you are until someone comes or something happens.', 'vi': 'Chờ đợi, ở yên đến khi ai đó đến hoặc việc gì xảy ra.'},
+    'ほめる': {'ja': 'いい ことを した ひとに「すごいね」と いう こと。', 'en': 'To tell someone "great job!" for something good.', 'vi': 'Khen, nói "giỏi quá!" với người đã làm việc tốt.'},
+    'もうしわけない': {'ja': 'わるい ことを して、「ごめんなさい」と ふかく おもう きもち。', 'en': 'Feeling very sorry, wanting to say "I am so sorry".', 'vi': 'Cảm thấy rất có lỗi, muốn nói "xin lỗi" thật lòng.'},
+    'かんちがい': {'ja': 'ほんとうは ちがうのに、そうだと おもいこむ こと。', 'en': 'Thinking something is true when it is actually not.', 'vi': 'Hiểu lầm, tưởng là thế này nhưng thật ra không phải.'},
+    'うしろめたい': {'ja': 'わるい ことを した ようで、むねが ちくちく して ひとの かおが みられない きもち。', 'en': 'Feeling guilty inside, so you cannot look people in the eye.', 'vi': 'Thấy áy náy trong lòng, không dám nhìn thẳng vào người khác vì thấy mình có lỗi.'},
+    'たからもの': {'ja': 'とても だいじに している もの。', 'en': 'Something you treasure very much.', 'vi': 'Món đồ mà mình rất quý, rất trân trọng.'},
+    'ふまん': {'ja': 'おもった ように ならなくて、「いやだな」と おもう きもち。', 'en': 'Feeling unhappy because things did not go the way you wanted.', 'vi': 'Bất mãn, không vừa ý vì mọi việc không như mình mong.'},
+    'うわさ': {'ja': 'ほんとうか どうか わからないのに、ひとから ひとへ つたわる はなし。', 'en': 'A story passed from person to person, even if no one knows if it is true.', 'vi': 'Tin đồn, chuyện truyền từ người này sang người khác dù chưa biết thật hay không.'},
+    'おそろしい': {'ja': 'とても こわい。ぞっと する くらい こわい こと。', 'en': 'Very scary; so scary it makes you shiver.', 'vi': 'Rất đáng sợ, sợ đến mức rùng mình.'},
+    'きもだめし': {'ja': 'くらい ところを あるいて、こわさに まけないか ためす あそび。', 'en': 'A game of walking through dark places to test your courage.', 'vi': 'Trò thử gan: đi qua nơi tối để xem mình có dám không.'},
+    'こころぼそい': {'ja': 'ひとりぼっちで、たよる ひとが いなくて、ふあんな きもち。', 'en': 'Feeling uneasy and alone, with no one to rely on.', 'vi': 'Cảm thấy bất an, cô đơn vì không có ai để nương tựa.'},
+    'はじめて': {'ja': 'いちばん さいしょ。いままで いちども したことが ない こと。', 'en': 'The very first time; never done it before.', 'vi': 'Lần đầu tiên, trước giờ chưa từng làm.'},
+    'なつかしい': {'ja': 'むかしの ことを おもいだして、また あいたい、もどりたいと おもう きもち。', 'en': 'The warm feeling of remembering the past and wanting to go back.', 'vi': 'Cảm giác hoài niệm, nhớ chuyện ngày xưa và muốn quay lại.'},
+    'しゃしん': {'ja': 'カメラで うつした けしきや ひとの すがた。', 'en': 'A picture of a person or place taken with a camera.', 'vi': 'Ảnh chụp bằng máy ảnh.'},
+    'はげましたい': {'ja': 'げんきの ない ひとに「がんばれ」と こえを かけて、げんきづけたい きもち。（もとの ことば: はげます）', 'en': 'Wanting to cheer someone up by saying "You can do it!" (base word: はげます)', 'vi': 'Muốn động viên, nói "cố lên" để người khác có thêm tinh thần. (Từ gốc: はげます)'},
+    'おとうと': {'ja': 'じぶんより としが した の おとこの きょうだい。', 'en': 'Your younger brother.', 'vi': 'Em trai.'},
+    'こんらん': {'ja': 'いろいろな ことが ごちゃごちゃに なって、なにが なんだか わからなく なる こと。', 'en': 'Being so mixed up that you cannot tell what is what.', 'vi': 'Rối loạn, mọi thứ lẫn lộn đến mức không hiểu gì nữa.'},
+    'せつめい': {'ja': 'ほかの ひとが わかるように、わけや ようすを はなして おしえる こと。', 'en': 'Explaining something so that others can understand.', 'vi': 'Giải thích để người khác hiểu.'},
+    'かう': {'ja': 'おかねを はらって、ものを じぶんの ものに する こと。', 'en': 'To pay money and get something.', 'vi': 'Mua, trả tiền để có món đồ.'},
+    'うそ': {'ja': 'ほんとうでは ない ことを、ほんとうのように いう こと。', 'en': 'Saying something that is not true as if it were true.', 'vi': 'Nói dối, nói điều không thật như thể thật.'},
+    'ふしぎ': {'ja': 'どうして そう なるのか わからなくて、ふしぎに おもう こと。', 'en': 'Strange and puzzling; you cannot tell why it happens.', 'vi': 'Kỳ lạ, khó hiểu, không biết vì sao lại như vậy.'},
+    'かいがい': {'ja': 'にほんの そとの くに。', 'en': 'Foreign countries, outside Japan.', 'vi': 'Nước ngoài, những nước ở ngoài Nhật Bản.'},
   };
 
   static String bunMeaning(String w, String lang) => _bunMeaning[w]?[lang] ?? '';
@@ -676,6 +861,35 @@ class KokugoEngine {
         _kakiItem(6, '', '大学生', 'ダイ|ガク|セイ', ''),
         KokugoItem(label: _circ[7], parts: [_b('左右', 'サ|ユウ'), _t('を よく'), _b('見', 'ミ'), _t('る。')]),
         _kakiItem(8, '', '小', 'コ', 'ゆび'),
+        // --- ページ3: かたかなを かん字に なおして (おくりがなも かく) ---
+        // おくりがなの ひらがなも 1もじずつ 1ますに かく (よみは カタカナ)
+        KokugoItem(label: _circ[0], parts: [
+          _b('音', 'オン'), _t('がくの'), _b('先生', 'セン|セイ'), _t('は'),
+          _b('大きい', 'オオ|キ|イ'), _t('こえを'), _b('出せる', 'ダ|セ|ル'), _t('。'),
+        ]),
+        KokugoItem(label: _circ[1], parts: [
+          _b('男子', 'ダン|シ'), _t('と'), _b('女子', 'ジョ|シ'), _t('、あわせて'), _b('百人', 'ヒャク|ニン'), _t('いる。'),
+        ]),
+        KokugoItem(label: _circ[2], parts: [
+          _t('わたしの ほうが'), _b('早く', 'ハヤ|ク'), _b('本', 'ホン'), _t('を よみおえた。'),
+        ]),
+        KokugoItem(label: _circ[3], parts: [
+          _t('この さかを'), _b('下って', 'クダ|ッ|テ'), _b('右', 'ミギ'), _t('に まがると、'),
+          _b('中学校', 'チュウ|ガッ|コウ'), _t('が'), _b('見える', 'ミ|エ|ル'), _t('。'),
+        ]),
+        KokugoItem(label: _circ[4], parts: [
+          _t('しょうらい、この'), _b('子', 'コ'), _t('は'), _b('大', 'オオ'), _t('ものに なると、'),
+          _b('小さい', 'チイ|サ|イ'), _t('ころから いわれていた。'),
+        ]),
+        KokugoItem(label: _circ[5], parts: [
+          _b('下校', 'ゲ|コウ'), _t('すると、'), _b('中', 'チュウ'), _t('で、'), _b('年上', 'トシ|ウエ'), _t('の ともだちに あった。'),
+        ]),
+        KokugoItem(label: _circ[6], parts: [
+          _b('右', 'ミギ'), _t('ききなので、'), _b('左手', 'ヒダリ|テ'), _t('で'), _b('名', 'ナ'), _t('まえを かくのは むずかしい。'),
+        ]),
+        KokugoItem(label: _circ[7], parts: [
+          _t('しょうぎの'), _b('名人', 'メイ|ジン'), _t('が、'), _b('本音', 'ホン|ネ'), _t('を かいた'), _b('文', 'ブン'), _t('しょう。'),
+        ]),
       ];
       final yomiItems = <KokugoItem>[
         KokugoItem(label: '①ア', parts: [_y('右', ['みぎ']), _t('となり')]),
@@ -707,9 +921,65 @@ class KokugoEngine {
         _strokeItem(4, '下', 3, p: 1, a: -15),
         _strokeItem(5, '先', 1, p: 0, a: -60),
       ];
+      // --- ページ4・5: かん字の もんだい (1)かたかなを かん字に (2)おくりがな ---
+      KokugoItem ki(int no, List<KokugoPart> parts) => KokugoItem(label: _circ[no], parts: parts);
+      final kakiP1 = <KokugoItem>[
+        ki(0, [_t('えいごを'), _b('学ぶ', 'マナ|ブ'), _t('。')]),
+        ki(1, [_b('本', 'ホン'), _t('気を'), _b('出', 'ダ'), _t('す。')]),
+        ki(2, [_t('てん'), _b('校生', 'コウ|セイ')]),
+        ki(3, [_b('文', 'ブン'), _t('化の日')]),
+        ki(4, [_t('しょうぎの'), _b('名人', 'メイ|ジン'), _t('。')]),
+        ki(5, [_t('空を'), _b('見上げる', 'ミ|ア|ゲ|ル'), _t('。')]),
+        ki(6, [_t('円の'), _b('中', 'チュウ'), _t('しん。')]),
+        ki(7, [_b('上下', 'ジョウ|ゲ'), _t('に うごかす。')]),
+        ki(8, [_b('年', 'トシ'), _t('こしそば')]),
+      ];
+      final kakiP2 = <KokugoItem>[
+        ki(0, [_b('名', 'メイ'), _t('さくを よむ。')]),
+        ki(1, [_b('生', 'ナマ'), _t('たまご')]),
+        ki(2, [_b('小学生', 'ショウ|ガク|セイ')]),
+        ki(3, [_b('校', 'コウ'), _t('ていで あそぶ。')]),
+        ki(4, [_b('音', 'オン'), _t('どくを する。')]),
+        ki(5, [_b('上', 'ウワ'), _t('ぎを きる。')]),
+        ki(6, [_b('年下', 'トシ|シタ'), _t('の ゆう人。')]),
+        ki(7, [_b('右手', 'ミギ|テ'), _t('を あげる。')]),
+        ki(8, [_b('文字', 'モ|ジ'), _t('を かく。')]),
+      ];
+      // おくりがな: かん字は もんだいに 印刷されている。ひらがなの おくりがなだけを かく
+      KokugoItem oku(String label, String before, String okuri, String reads) =>
+          KokugoItem(label: label, parts: [_t(before), _b(okuri, reads), _t('。')]);
+      final kakiExtra = <List<KokugoItem>>[
+        for (var g = 0; g < 3; g++) kakiP1.sublist(g * 3, g * 3 + 3),
+        for (var g = 0; g < 3; g++) kakiP2.sublist(g * 3, g * 3 + 3),
+        [
+          oku('①ア', '子犬が 生', 'まれる', 'ウマレル||'),
+          oku('①イ', '花を 生', 'ける', 'イケル|'),
+        ],
+        [
+          oku('①ウ', '百さいまで 生', 'きる', 'イキル|'),
+          oku('①エ', '草が 生', 'える', 'ハエル|'),
+        ],
+        [
+          oku('②ア', 'さかを 上', 'る', 'ノボル'),
+          oku('②イ', 'かいだんを 上', 'がる', 'アガル|'),
+          oku('②ウ', 'スピードを 上', 'げる', 'アゲル|'),
+        ],
+      ];
+      // かん字の よみ ページ4: おなじ かん字の ちがう よみ (音・生・先)
+      final yomiExtra = <KokugoItem>[
+        KokugoItem(label: '①ア', parts: [_t('足'), _y('音', ['おと'])]),
+        KokugoItem(label: '①イ', parts: [_y('音', ['おん']), _t('がく')]),
+        KokugoItem(label: '①ウ', parts: [_y('音', ['ね']), _t('いろ')]),
+        KokugoItem(label: '②ア', parts: [_t('一年'), _y('生', ['せい'])]),
+        KokugoItem(label: '②イ', parts: [_t('一'), _y('生', ['しょう'])]),
+        KokugoItem(label: '②ウ', parts: [_y('生', ['う']), _t('まれる')]),
+        KokugoItem(label: '③ア', parts: [_y('先', ['せん']), _t('生')]),
+        KokugoItem(label: '③イ', parts: [_t('ゆび'), _y('先', ['さき'])]),
+        KokugoItem(label: '③ウ', parts: [_y('先', ['せん']), _t('日')]),
+      ];
       // moi bai mau chi 3 cau
       all = <KokugoLesson>[
-        for (var n = 0; n < 6; n++)
+        for (var n = 0; n < (kakiItems.length + 2) ~/ 3; n++)
           KokugoLesson(
             id: 'KK00${n + 1}',
             title: {
@@ -720,7 +990,7 @@ class KokugoEngine {
             question: questionFor('kaki'),
             kind: 'kaki',
             difficulty: n == 1 ? 1 : 2,
-            items: kakiItems.sublist(n * 3, n * 3 + 3),
+            items: kakiItems.sublist(n * 3, min(n * 3 + 3, kakiItems.length)),
           ),
         for (var n = 0; n < 6; n++)
           KokugoLesson(
@@ -734,6 +1004,54 @@ class KokugoEngine {
             kind: 'yomi',
             difficulty: n == 0 ? 1 : 2,
             items: yomiItems.sublist(n * 3, n * 3 + 3),
+          ),
+        // かん字を かこう ページ4・5 (おくりがなを ふくむ): 上の kakiExtra
+        for (var n = 0; n < kakiExtra.length; n++)
+          KokugoLesson(
+            id: 'KK${(n + 10).toString().padLeft(3, '0')}',
+            title: {
+              'ja': 'かん字を かこう ${n + 10}',
+              'en': 'Write the Kanji ${n + 10}',
+              'vi': 'Viết chữ Hán ${n + 10}',
+            },
+            question: n < 6
+                ? questionFor('kaki')
+                : {
+                    'ja': 'つぎの かん字を つかい、正しい おくりがなを ひらがなで かきましょう。',
+                    'en': 'Using the kanji shown, write the correct okurigana (hiragana ending).',
+                    'vi': 'Dùng chữ Hán cho sẵn, viết okurigana (phần hiragana đi kèm) cho đúng.',
+                  },
+            kind: 'kaki',
+            difficulty: 2,
+            items: kakiExtra[n],
+          ),
+        // かん字の よみ ページ4 (おなじ かん字の ちがう よみ): 3 bai
+        for (var n = 0; n < 3; n++)
+          KokugoLesson(
+            id: 'KY${(n + 15).toString().padLeft(3, '0')}',
+            title: {
+              'ja': 'かん字の よみ ${n + 15}',
+              'en': 'Kanji Readings ${n + 15}',
+              'vi': 'Cách đọc chữ Hán ${n + 15}',
+            },
+            question: questionFor('yomi'),
+            kind: 'yomi',
+            difficulty: 2,
+            items: yomiExtra.sublist(n * 3, n * 3 + 3),
+          ),
+        // かん字の よみ ページ3: 8 cau van (moi cau 2-3 cho), moi cau la 1 bai
+        for (var n = 0; n < _yomiSent.length; n++)
+          KokugoLesson(
+            id: 'KY${(n + 7).toString().padLeft(3, '0')}',
+            title: {
+              'ja': 'かん字の よみ ${n + 7}',
+              'en': 'Kanji Readings ${n + 7}',
+              'vi': 'Cách đọc chữ Hán ${n + 7}',
+            },
+            question: questionFor('yomi'),
+            kind: 'yomi',
+            difficulty: 2,
+            items: _yomiSentence(n, _yomiSent[n]),
           ),
         // ひつじゅん: 6 chu trong sach, chia 2 bai
         for (var n = 0; n < 2; n++)
@@ -782,6 +1100,48 @@ class KokugoEngine {
               for (var i = 0; i < 3; i++) _setsuItem(n * 3 + i, _setsuBank[const [0, 4, 8, 11, 16, 21][n * 3 + i]]),
             ],
             bank: const ['まだ', 'もう', 'けれども', 'なぜなら', 'それとも', 'だから'],
+          ),
+        // あてはまる ことば ページ3 (ぎたいご): (1)〜(6) を 3もんずつ 2つの 問題に わける
+        // 本の わくの ことば 7つ: さっぱり ぎっしり くっきり こっそり めっきり ゆくゆく はるばる (ゆくゆくは つかわない)
+        for (var n = 0; n < 2; n++)
+          KokugoLesson(
+            id: 'ST00${n + 3}',
+            title: {
+              'ja': 'あてはまる ことば ${n + 3}',
+              'en': 'Fill in the Word ${n + 3}',
+              'vi': 'Điền từ thích hợp ${n + 3}',
+            },
+            question: questionFor('setsuzoku'),
+            kind: 'setsuzoku',
+            difficulty: 2,
+            items: [
+              for (var i = 0; i < 3; i++)
+                _setsuItem(n * 3 + i, _setsuBank[_setsuBank.indexWhere((e) => e[3] == 'zめっきり') + n * 3 + i]),
+            ],
+            bank: n == 0
+                ? const ['めっきり', 'こっそり', 'ぎっしり', 'ゆくゆく']
+                : const ['くっきり', 'はるばる', 'さっぱり', 'ゆくゆく'],
+          ),
+        // あてはまる ことば ページ4 (ぎたいご・ふくし): 本の 3 (1)〜(6) を 3もんずつ 2つの 問題に わける
+        // 本の わくの ことば: まじまじと さっそうと なかなか もっとも 一目さんに みるみる
+        for (var n = 0; n < 2; n++)
+          KokugoLesson(
+            id: 'ST00${n + 5}',
+            title: {
+              'ja': 'あてはまる ことば ${n + 5}',
+              'en': 'Fill in the Word ${n + 5}',
+              'vi': 'Điền từ thích hợp ${n + 5}',
+            },
+            question: questionFor('setsuzoku'),
+            kind: 'setsuzoku',
+            difficulty: 2,
+            items: [
+              for (var i = 0; i < 3; i++)
+                _setsuItem(n * 3 + i, _setsuBank[_setsuBank.indexWhere((e) => e[3] == 'zなかなか') + n * 3 + i]),
+            ],
+            bank: n == 0
+                ? const ['なかなか', 'さっそうと', 'みるみる', 'まじまじと']
+                : const ['一目さんに', 'まじまじと', 'もっとも', 'さっそうと'],
           ),
         // おなじ おとの かん字: 6 nhom trong sach (1)-(6), moi nhom la 1 bai (2-3 cau)
         for (var n = 0; n < 6; n++)
@@ -834,9 +1194,25 @@ class KokugoEngine {
                 shown: ['やくそくを', 'あそぶ', 'あした', 'しました', 'こうえんで', 'ともだちと', 'ぼくは']),
           ],
         ),
-        // ことばを つかって ぶんを つくろう: 本の 5 (1)〜(4) を 2もんずつ 2つの 問題に わける
+        // こそあど ことば: 本の 4 (1)〜(3)
+        KokugoLesson(
+          id: 'SJ001',
+          title: {'ja': 'こそあど ことば 1', 'en': 'What Does It Point To? 1', 'vi': 'Từ chỉ thị 1'},
+          question: questionFor('shiji'),
+          kind: 'shiji',
+          difficulty: 2,
+          items: [
+            _shijiItem('(1)', 'あたらしい レストランが えきの そばに できた。ぼくは ', 'そこ', 'で ごはんを たべた。',
+                ['レストラン', 'えき', 'ごはん'], 0),
+            _shijiItem('(2)', 'おばあちゃんが みんなに おこづかいを くれた。わたしは ', 'それ',
+                'を ちょ金して、いつか じてん車を かおうと きめた。', ['おばあちゃん', 'おこづかい', 'じてん車'], 1),
+            _shijiItem('(3)', 'ともだちが でん車の もけいを 見せてくれた。「', 'これ',
+                'が ぼくの たからものだよ」と いいながら、ともだちは にこにこしていた。', ['でん車', 'もけい', 'たからもの'], 1),
+          ],
+        ),
+        // ことばを つかって ぶんを つくろう: 本の 5・6・7・8 (各 (1)〜(4)) を 2もんずつ 4つの 問題に わける
         // (cau mau la do ta soan de tu cham)
-        for (var n = 0; n < 2; n++)
+        for (var n = 0; n < _bunBook.length ~/ 2; n++)
           KokugoLesson(
             id: 'BS00${n + 1}',
             title: {
@@ -849,7 +1225,7 @@ class KokugoEngine {
             difficulty: 2,
             items: [
               for (var i = 0; i < 2; i++)
-                _bunItem('(${n * 2 + i + 1})', _bunBook[n * 2 + i][0] as String, _bunBook[n * 2 + i][1] as String,
+                _bunItem('(${(n % 2) * 2 + i + 1})', _bunBook[n * 2 + i][0] as String, _bunBook[n * 2 + i][1] as String,
                     (_bunBook[n * 2 + i][2] as List).cast<String>()),
             ],
           ),
@@ -914,6 +1290,26 @@ class KokugoEngine {
     ['女子', 'ジョ|シ', '', 'と あそぶ。'],
     ['男子', 'ダン|シ', '', 'の ちょうれつ。'],
     ['火山', 'カ|ザン', '', 'が ふんかする。'],
+    ['大きい', 'オオ|キ|イ', '', 'いぬが いる。'],
+    ['小さい', 'チイ|サ|イ', '', 'ねこが ねている。'],
+    ['早く', 'ハヤ|ク', '', 'おきて さんぽに いく。'],
+    ['見える', 'ミ|エ|ル', 'とおくの やまが', '。'],
+    ['出せる', 'ダ|セ|ル', 'おおきな こえが', '。'],
+    ['下って', 'クダ|ッ|テ', 'さかを', 'いく。'],
+    ['百人', 'ヒャク|ニン', '', 'が あつまる。'],
+    ['年上', 'トシ|ウエ', '', 'の ともだち。'],
+    ['下校', 'ゲ|コウ', '', 'の じかん。'],
+    ['中学校', 'チュウ|ガッ|コウ', '', 'に かよう。'],
+    ['名人', 'メイ|ジン', 'しょうぎの', '。'],
+    ['本音', 'ホン|ネ', '', 'を はなす。'],
+    ['年下', 'トシ|シタ', '', 'の ゆう人。'],
+    ['右手', 'ミギ|テ', '', 'を あげる。'],
+    ['文字', 'モ|ジ', '', 'を かく。'],
+    ['音読', 'オン|ドク', '', 'を する。'],
+    ['名作', 'メイ|サク', '', 'を よむ。'],
+    ['上着', 'ウワ|ギ', '', 'を きる。'],
+    ['学ぶ', 'マナ|ブ', 'えいごを', '。'],
+    ['見上げる', 'ミ|ア|ゲ|ル', 'そらを', '。'],
     ['出口', 'デ|グチ', '', 'は あちら。'],
     ['入口', 'イリ|グチ', '', 'に たつ。'],
     ['正月', 'ショウ|ガツ', '', 'を むかえる。'],
@@ -1062,9 +1458,30 @@ class KokugoEngine {
         ],
       );
     }
+    if (kind == 'shiji') {
+      final count = lv == 1 ? 2 : 3;
+      final pool = List<List<dynamic>>.from(_shijiPool)..shuffle(r);
+      final items = <KokugoItem>[];
+      for (var i = 0; i < count; i++) {
+        final e = pool[i];
+        final opts = (e[3] as List).cast<String>();
+        final ans = opts[e[4] as int];
+        final sh = List<String>.from(opts)..shuffle(r);
+        items.add(_shijiItem('(${i + 1})', e[0] as String, e[1] as String, e[2] as String, sh, sh.indexOf(ans)));
+      }
+      return KokugoLesson(
+        id: id,
+        title: title,
+        question: questionFor('shiji'),
+        kind: 'shiji',
+        difficulty: lv,
+        isAutoGenerated: true,
+        items: items,
+      );
+    }
     if (kind == 'bunsaku') {
       const count = 2; // moi bai chi 2 cau cho de lam
-      final pool = List<List<dynamic>>.from(_bunPool)..shuffle(r);
+      final pool = <List<dynamic>>[..._bunPool, ..._bunBook]..shuffle(r);
       return KokugoLesson(
         id: id,
         title: title,
@@ -1138,10 +1555,11 @@ class KokugoEngine {
     if (kind == 'setsuzoku') {
       // muc 1: 2 cau, muc 2-3: 3 cau; muc 2 them 1 tu thua, muc 3 them 2 tu thua
       final count = lv == 1 ? 2 : 3;
+      var adv = r.nextBool(); // true: ぎたいご(ふくし) / false: せつぞくご
       List<List<String>> picks = [];
       List<String> words = [];
       for (var t = 0; t < 300; t++) {
-        final pool = List<List<String>>.from(_setsuBank)..shuffle(r);
+        final pool = [for (final e in _setsuBank) if (e[3].startsWith('z') == adv) e]..shuffle(r);
         final cand = <List<String>>[];
         final used = <String>{};
         for (final e in pool) {
@@ -1157,12 +1575,13 @@ class KokugoEngine {
       }
       if (picks.isEmpty) {
         // du phong (hiem): lay 2 cau mau trong sach
+        adv = false;
         picks = [_setsuBank[0], _setsuBank[4]];
         words = ['まだ', 'もう'];
       }
       final extra = lv == 1 ? 0 : (lv == 2 ? 1 : 2);
       final spare = [
-        for (final w in _setsuWords)
+        for (final w in (adv ? _advWords : _setsuWords))
           if (!words.contains(w) && picks.every((e) => !_setsuCompat[e[3]]!.contains(w))) w,
       ]..shuffle(r);
       final bank = [...words, ...spare.take(extra)]..shuffle(r);

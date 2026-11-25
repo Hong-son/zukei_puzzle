@@ -7,6 +7,8 @@ import '../services/locale_service.dart';
 import '../services/progress_service.dart';
 import '../services/kokugo_engine.dart';
 import '../widgets/hint_dialog.dart';
+import '../widgets/word_comic.dart';
+import '../services/word_help.dart';
 import 'reward_screen.dart';
 
 // にた いみの ことば: trong khung co cac tu, chon ra tung cap hai tu dong nghia va xep vao 2 o.
@@ -232,6 +234,14 @@ class _KokugoRuigiScreenState extends State<KokugoRuigiScreen> {
           child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
             _ToolBtn(icon: Icons.refresh, label: 'リセット', color: Colors.red, onTap: () => setState(_reset)),
             _ToolBtn(icon: Icons.lightbulb, label: 'ヒント', color: Colors.amber, onTap: _onHint),
+            _ToolBtn(
+                icon: Icons.menu_book,
+                label: 'いみ',
+                color: Colors.teal,
+                onTap: () => showWordHelpDialog(
+                    context,
+                    [for (var i = 0; i < _items.length; i++) for (final w in _pair(i)) HelpEntry(w)],
+                    context.read<LocaleService>().lang)),
             ElevatedButton.icon(
               onPressed: _onCheck,
               icon: const Icon(Icons.check_circle, size: 18),

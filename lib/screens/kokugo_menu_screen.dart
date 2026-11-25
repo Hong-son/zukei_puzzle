@@ -76,6 +76,18 @@ class KokugoMenuScreen extends StatelessWidget {
       },
       'color': Color(0xFF1E88E5),
     },
+    {
+      'id': 'shiji',
+      'kinds': ['shiji'],
+      'icon': '👉',
+      'name': {'ja': 'こそあど ことば', 'en': 'This / That Words', 'vi': 'Từ chỉ thị (これ・それ…)'},
+      'desc': {
+        'ja': 'これ・それ・そこは なにを さしているかな？',
+        'en': 'What does これ / それ / そこ point to?',
+        'vi': 'これ・それ・そこ chỉ vào cái gì?'
+      },
+      'color': Color(0xFFEF6C00),
+    },
   ];
 
   @override

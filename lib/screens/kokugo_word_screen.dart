@@ -7,6 +7,8 @@ import '../services/locale_service.dart';
 import '../services/progress_service.dart';
 import '../services/kokugo_engine.dart';
 import '../widgets/hint_dialog.dart';
+import '../widgets/word_comic.dart';
+import '../services/word_help.dart';
 import 'reward_screen.dart';
 
 // あてはまる ことば: cho trong trong cau, chon tu trong khung (bank) de dien.
@@ -221,6 +223,12 @@ class _KokugoWordScreenState extends State<KokugoWordScreen> {
           child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
             _ToolBtn(icon: Icons.refresh, label: 'リセット', color: Colors.red, onTap: _onReset),
             _ToolBtn(icon: Icons.lightbulb, label: 'ヒント', color: Colors.amber, onTap: _onHint),
+            _ToolBtn(
+                icon: Icons.menu_book,
+                label: 'いみ',
+                color: Colors.teal,
+                onTap: () => showWordHelpDialog(
+                    context, [for (final w in widget.lesson.bank) HelpEntry(w)], context.read<LocaleService>().lang)),
             ElevatedButton.icon(
               onPressed: _onCheck,
               icon: const Icon(Icons.check_circle, size: 18),

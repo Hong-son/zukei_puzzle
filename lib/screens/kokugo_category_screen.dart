@@ -12,6 +12,7 @@ import 'kokugo_idiom_screen.dart';
 import 'kokugo_word_screen.dart';
 import 'kokugo_narabe_screen.dart';
 import 'kokugo_bun_screen.dart';
+import 'kokugo_shiji_screen.dart';
 
 class KokugoCategoryScreen extends StatelessWidget {
   final Map<String, dynamic> category;
@@ -88,6 +89,7 @@ class KokugoCategoryScreen extends StatelessWidget {
                       if (lesson.kind == 'setsuzoku') return KokugoWordScreen(lesson: lesson);
                       if (lesson.kind == 'narabe') return KokugoNarabeScreen(lesson: lesson);
                       if (lesson.kind == 'bunsaku') return KokugoBunScreen(lesson: lesson);
+                      if (lesson.kind == 'shiji') return KokugoShijiScreen(lesson: lesson);
                       return KokugoGameScreen(lesson: lesson);
                     }),
                   ),
