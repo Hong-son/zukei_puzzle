@@ -34,10 +34,14 @@ class KokugoMenuScreen extends StatelessWidget {
     },
     {
       'id': 'hitsujun',
-      'kinds': ['hitsujun'],
+      'kinds': ['hitsujun', 'kakijun'],
       'icon': '🖌️',
       'name': {'ja': 'かん字の ひつじゅん', 'en': 'Stroke Order', 'vi': 'Thứ tự nét chữ Hán'},
-      'desc': {'ja': 'なんばん目に かくかな？', 'en': 'Which stroke is it?', 'vi': 'Mũi tên chỉ nét thứ mấy?'},
+      'desc': {
+        'ja': 'なんばん目？・正しい かきじゅんは？',
+        'en': 'Which stroke? / Which order is right?',
+        'vi': 'Nét thứ mấy? / Thứ tự viết nào đúng?'
+      },
       'color': Color(0xFFEF6C00),
     },
     {
@@ -54,25 +58,25 @@ class KokugoMenuScreen extends StatelessWidget {
     },
     {
       'id': 'ireru',
-      'kinds': ['kanyou', 'setsuzoku'],
+      'kinds': ['kanyou', 'setsuzoku', 'kotowaza'],
       'icon': '🧩',
       'name': {'ja': 'ことばを いれよう', 'en': 'Fill in the Word', 'vi': 'Điền từ vào chỗ trống'},
       'desc': {
-        'ja': 'かんようく・せつぞくの ことば',
-        'en': 'Idioms & conjunctions',
-        'vi': 'Thành ngữ & từ nối'
+        'ja': 'かんようく・ことわざ・せつぞくの ことば',
+        'en': 'Idioms, proverbs & conjunctions',
+        'vi': 'Quán dụng ngữ, tục ngữ & từ nối'
       },
       'color': Color(0xFF43A047),
     },
     {
       'id': 'narabe',
-      'kinds': ['narabe', 'bunsaku'],
+      'kinds': ['narabe', 'bunsaku', 'shugo'],
       'icon': '📝',
       'name': {'ja': 'ぶんを つくろう', 'en': 'Build the Sentence', 'vi': 'Sắp xếp thành câu'},
       'desc': {
-        'ja': 'ならべかえる・ことばを つかって かく',
-        'en': 'Reorder words / write with given words',
-        'vi': 'Xếp từ thành câu / đặt câu với từ cho sẵn'
+        'ja': 'ならべかえる・ことばを つかって かく・しゅご じゅつご',
+        'en': 'Reorder words / write with given words / subject & predicate',
+        'vi': 'Xếp từ / đặt câu / chủ ngữ & vị ngữ'
       },
       'color': Color(0xFF1E88E5),
     },

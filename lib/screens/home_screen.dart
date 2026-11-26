@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../services/reward_service.dart';
 import '../services/locale_service.dart';
 import 'subject_screen.dart';
+import 'kokugo_menu_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -104,7 +105,10 @@ class HomeScreen extends StatelessWidget {
                       onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => SubjectScreen(subject: sub['id'] as String, info: sub),
+                          // 国語: vao thang danh sach cac nhom bai tap (khong qua man trung gian)
+                          builder: (_) => sub['id'] == 'kokugo'
+                              ? KokugoMenuScreen(category: sub)
+                              : SubjectScreen(subject: sub['id'] as String, info: sub),
                         ),
                       ),
                       child: Container(

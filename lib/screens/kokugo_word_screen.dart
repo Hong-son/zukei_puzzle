@@ -108,7 +108,7 @@ class _KokugoWordScreenState extends State<KokugoWordScreen> {
       );
       return;
     }
-    _snack(KokugoEngine.withWrong(KokugoEngine.wrongMessage('setsuzoku', lang), bad, lang));
+    _snack(KokugoEngine.withWrong(KokugoEngine.wrongMessage(widget.lesson.kind == 'kotowaza' ? 'kotowaza' : 'setsuzoku', lang), bad, lang));
   }
 
   // Goi y: dien dung san mot cau chua dung va khoa lai
@@ -185,6 +185,7 @@ class _KokugoWordScreenState extends State<KokugoWordScreen> {
           child: Text(l.question[lang] ?? '',
               style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
         ),
+        if (l.kind == 'kotowaza') _kotoGuide(lang),
         // khung chua cac tu de chon
         Padding(
           padding: const EdgeInsets.fromLTRB(12, 4, 12, 4),
@@ -223,6 +224,7 @@ class _KokugoWordScreenState extends State<KokugoWordScreen> {
           child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
             _ToolBtn(icon: Icons.refresh, label: 'リセット', color: Colors.red, onTap: _onReset),
             _ToolBtn(icon: Icons.lightbulb, label: 'ヒント', color: Colors.amber, onTap: _onHint),
+            if (widget.lesson.kind != 'kotowaza')
             _ToolBtn(
                 icon: Icons.menu_book,
                 label: 'いみ',
@@ -266,7 +268,77 @@ class _KokugoWordScreenState extends State<KokugoWordScreen> {
     );
   }
 
+  // ことわざって なあに？ (れい) -- sach: trang 3
+  Widget _kotoGuide(String lang) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 2, 12, 2),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: const Color(0xFFE0F7FA),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.teal.shade300, width: 1.5),
+        ),
+        child: Text(
+          lang == 'ja'
+              ? 'ことわざ ＝ むかしから いいつたえられている おしえや いましめを、みじかい ことばに したもの。\n〈れい〉さるも 木から おちる ＝ どんな 名人でも しっぱいする ことが あると いう たとえ。'
+              : lang == 'en'
+                  ? 'A proverb is a short saying passed down since long ago that teaches a lesson.\nExample: さるも木からおちる = even an expert can make a mistake.'
+                  : 'ことわざ là câu nói ngắn truyền từ xưa, chứa lời dạy hoặc lời nhắc nhở.\nVí dụ: さるも木からおちる = dù là cao thủ cũng có lúc thất bại.',
+          style: const TextStyle(fontSize: 12),
+        ),
+      ),
+    );
+  }
+
+  Widget _kotoItem(int i, KokugoItem it, String lang) {
+    final selected = _sel == i;
+    final locked = _locked.contains(i);
+    final text = it.parts.firstWhere((p) => !p.blank).text;
+    final emoji = (it.extra['e'] as String?) ?? '';
+    final m = (it.extra['m'] as Map?)?[lang] as String?;
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: Colors.grey.shade300, width: 2),
+      ),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          SizedBox(width: 40, child: Text(it.label, style: const TextStyle(fontSize: 16))),
+          Expanded(child: Text(text, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600, height: 1.4))),
+          if (emoji.isNotEmpty)
+            Padding(padding: const EdgeInsets.only(left: 8), child: Text(emoji, style: const TextStyle(fontSize: 32))),
+        ]),
+        if (m != null && lang != 'ja')
+          Padding(
+            padding: const EdgeInsets.only(left: 40, top: 2),
+            child: Text(m, style: const TextStyle(fontSize: 12, color: Colors.black54)),
+          ),
+        const SizedBox(height: 8),
+        GestureDetector(
+          onTap: () => _tapBlank(i),
+          child: Container(
+            width: double.infinity,
+            height: 52,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: locked ? const Color(0xFFE3F2FD) : (selected ? const Color(0xFFFFF3E0) : Colors.grey.shade100),
+              border: Border.all(color: selected ? const Color(0xFFEF6C00) : Colors.black87, width: selected ? 3 : 2),
+            ),
+            child: Text(_ans[i],
+                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF1565C0))),
+          ),
+        ),
+      ]),
+    );
+  }
+
   Widget _item(int i, KokugoItem it) {
+    if (widget.lesson.kind == 'kotowaza') return _kotoItem(i, it, context.read<LocaleService>().lang);
     final selected = _sel == i;
     final locked = _locked.contains(i);
     final children = <Widget>[];

@@ -8,6 +8,7 @@ import '../models/mark_lesson.dart';
 import '../models/hide_lesson.dart';
 import '../models/pyramid_lesson.dart';
 import '../models/calendar_lesson.dart';
+import '../models/clock_lesson.dart';
 import '../models/back_lesson.dart';
 import '../models/pick_lesson.dart';
 import '../models/half_lesson.dart';
@@ -25,6 +26,7 @@ class ProgressService extends ChangeNotifier {
   final List<HideLesson> _generatedHides = [];
   final List<PyramidLesson> _generatedPyramids = [];
   final List<CalendarLesson> _generatedCalendars = [];
+  final List<ClockLesson> _generatedClocks = [];
   final List<BackLesson> _generatedBacks = [];
   final List<PickLesson> _generatedPicks = [];
   final List<HalfLesson> _generatedHalves = [];
@@ -40,6 +42,7 @@ class ProgressService extends ChangeNotifier {
   List<HideLesson> get generatedHides => List.unmodifiable(_generatedHides);
   List<PyramidLesson> get generatedPyramids => List.unmodifiable(_generatedPyramids);
   List<CalendarLesson> get generatedCalendars => List.unmodifiable(_generatedCalendars);
+  List<ClockLesson> get generatedClocks => List.unmodifiable(_generatedClocks);
   List<BackLesson> get generatedBacks => List.unmodifiable(_generatedBacks);
   List<PickLesson> get generatedPicks => List.unmodifiable(_generatedPicks);
   List<HalfLesson> get generatedHalves => List.unmodifiable(_generatedHalves);
@@ -86,6 +89,7 @@ class ProgressService extends ChangeNotifier {
     _loadList(prefs, 'generated_views', _generatedViews, ViewLesson.fromJson);
     _loadList(prefs, 'generated_pyramids', _generatedPyramids, PyramidLesson.fromJson);
     _loadList(prefs, 'generated_calendars', _generatedCalendars, CalendarLesson.fromJson);
+    _loadList(prefs, 'generated_clocks', _generatedClocks, ClockLesson.fromJson);
     // du lieu cu co the co nhieu bai tu sinh: chi giu bai moi nhat
     void keepLast(List<dynamic> l) {
       if (l.length > 1) l.removeRange(0, l.length - 1);
@@ -93,7 +97,7 @@ class ProgressService extends ChangeNotifier {
     for (final l in <List<dynamic>>[
       _generated, _generatedDice, _generatedNets, _generatedMarks, _generatedHides,
       _generatedBacks, _generatedPicks, _generatedHalves, _generatedDotSquares,
-      _generatedPyramids, _generatedCalendars,
+      _generatedPyramids, _generatedCalendars, _generatedClocks,
     ]) {
       keepLast(l);
     }
@@ -138,6 +142,7 @@ class ProgressService extends ChangeNotifier {
     await prefs.setString('generated_views', jsonEncode(_generatedViews.map((l) => l.toJson()).toList()));
     await prefs.setString('generated_pyramids', jsonEncode(_generatedPyramids.map((l) => l.toJson()).toList()));
     await prefs.setString('generated_calendars', jsonEncode(_generatedCalendars.map((l) => l.toJson()).toList()));
+    await prefs.setString('generated_clocks', jsonEncode(_generatedClocks.map((l) => l.toJson()).toList()));
   }
 
   Future<void> markCompleted(String lessonId) async {
@@ -251,6 +256,13 @@ class ProgressService extends ChangeNotifier {
     _generatedCalendars
       ..clear()
       ..add(l); // chi giu 1 bai tu sinh, bai moi thay bai cu
+    await _save();
+    notifyListeners();
+  }
+
+  Future<void> addGeneratedClock(ClockLesson l) async {
+    _generatedClocks.removeWhere((e) => e.kind == l.kind); // moi dang chi giu 1 bai tu sinh
+    _generatedClocks.add(l);
     await _save();
     notifyListeners();
   }

@@ -8,8 +8,8 @@ import 'pyramid_category_screen.dart';
 import 'calendar_category_screen.dart';
 import 'half_category_screen.dart';
 import 'dotsquare_category_screen.dart';
-import 'kokugo_menu_screen.dart';
 import 'view_menu_screen.dart';
+import 'clock_category_screen.dart';
 
 // Man hinh cap 2: danh sach cac dang bai cua mot mon (sansu hoac kokugo).
 class SubjectScreen extends StatelessWidget {
@@ -73,6 +73,28 @@ class SubjectScreen extends StatelessWidget {
       'subject': 'sansu',
     },
     {
+      'id': 'clock',
+      'icon': '🕐',
+      'name': {'ja': 'とけいの はり', 'en': 'Clock Hands', 'vi': 'Kim đồng hồ'},
+      'desc': {'ja': 'はりを うごかして じこくを あわせよう', 'en': 'Set the hands and tell the time', 'vi': 'Chỉnh kim và đọc giờ'},
+      'color': Color(0xFFEC407A),
+      'mode': 'clock',
+      'subject': 'sansu',
+    },
+    {
+      'id': 'jikan',
+      'icon': '⏱️',
+      'name': {'ja': 'じこくと じかん', 'en': 'Time and Duration', 'vi': 'Giờ và khoảng thời gian'},
+      'desc': {
+        'ja': 'あと なんじかん？・かがみの 中の とけい',
+        'en': 'How long until...? / Clock in a mirror',
+        'vi': 'Còn bao lâu? / Đồng hồ trong gương'
+      },
+      'color': Color(0xFFD81B60),
+      'mode': 'jikan',
+      'subject': 'sansu',
+    },
+    {
       'id': 'view',
       'icon': '👁️',
       'name': {'ja': 'みえかた・かげ', 'en': 'Views & Shadows', 'vi': 'Nhìn từ trên & bóng'},
@@ -80,15 +102,6 @@ class SubjectScreen extends StatelessWidget {
       'color': Color(0xFF00ACC1),
       'mode': 'view',
       'subject': 'sansu',
-    },
-    {
-      'id': 'kanji',
-      'icon': '✍️',
-      'name': {'ja': 'かん字', 'en': 'Kanji', 'vi': 'Chữ Hán'},
-      'desc': {'ja': 'かいて・よんで みよう', 'en': 'Write and read kanji', 'vi': 'Viết và đọc chữ Hán'},
-      'color': Color(0xFF5C6BC0),
-      'mode': 'kokugo',
-      'subject': 'kokugo',
     },
   ];
 
@@ -104,10 +117,12 @@ class SubjectScreen extends StatelessWidget {
         return HalfCategoryScreen(category: cat);
       case 'dotsquare':
         return DotSquareCategoryScreen(category: cat);
+      case 'clock':
+        return ClockCategoryScreen(category: cat);
+      case 'jikan':
+        return ClockCategoryScreen(category: cat, kind: 'span');
       case 'view':
         return ViewMenuScreen(category: cat);
-      case 'kokugo':
-        return KokugoMenuScreen(category: cat);
       default:
         return CategoryScreen(category: cat);
     }
