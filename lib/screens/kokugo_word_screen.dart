@@ -28,7 +28,19 @@ class _KokugoWordScreenState extends State<KokugoWordScreen> {
   int _tries = 0;
 
   List<KokugoItem> get _items => widget.lesson.items;
+  // 'tsunagi': tu trong khung duoc dung nhieu lan
+  bool get _reuse => _items.isNotEmpty && _items.first.extra['reuse'] == true;
   String _correct(int i) => _items[i].firstBlank.reads.first;
+  // 'doyomi': 1つの よみに 2つの かん字 (どちらの じゅんでも OK) -> extra['any']
+  List<String> _anyOf(int i) {
+    final a = _items[i].extra['any'];
+    return a is List ? a.cast<String>() : const [];
+  }
+
+  bool _ok(int i) {
+    final any = _anyOf(i);
+    return any.isNotEmpty ? any.contains(_ans[i]) : _ans[i] == _correct(i);
+  }
 
   @override
   void initState() {
@@ -53,16 +65,20 @@ class _KokugoWordScreenState extends State<KokugoWordScreen> {
   }
 
   void _pick(String w) {
-    // tu da dung trong cau da khoa thi khong dung lai duoc
-    for (final j in _locked) {
-      if (_ans[j] == w) return;
+    // tu da dung trong cau da khoa thi khong dung lai duoc (tru khi cho phep dung nhieu lan)
+    if (!_reuse) {
+      for (final j in _locked) {
+        if (_ans[j] == w) return;
+      }
     }
     var target = _sel;
     if (_locked.contains(target)) target = _nextEmpty(target);
     if (_locked.contains(target)) return;
     setState(() {
-      for (var j = 0; j < _ans.length; j++) {
-        if (_ans[j] == w && !_locked.contains(j)) _ans[j] = '';
+      if (!_reuse) {
+        for (var j = 0; j < _ans.length; j++) {
+          if (_ans[j] == w && !_locked.contains(j)) _ans[j] = '';
+        }
       }
       _ans[target] = w;
       _sel = _nextEmpty(target);
@@ -92,7 +108,7 @@ class _KokugoWordScreenState extends State<KokugoWordScreen> {
     _tries++;
     final bad = <String>[];
     for (var i = 0; i < _ans.length; i++) {
-      if (_ans[i] != _correct(i)) bad.add(_items[i].label);
+      if (!_ok(i)) bad.add(_items[i].label);
     }
     final ok = bad.isEmpty;
     if (ok) {
@@ -108,7 +124,8 @@ class _KokugoWordScreenState extends State<KokugoWordScreen> {
       );
       return;
     }
-    _snack(KokugoEngine.withWrong(KokugoEngine.wrongMessage(widget.lesson.kind == 'kotowaza' ? 'kotowaza' : 'setsuzoku', lang), bad, lang));
+    _snack(KokugoEngine.withWrong(KokugoEngine.wrongMessage(
+        const ['kotowaza', 'tsunagi', 'doyomi'].contains(widget.lesson.kind) ? widget.lesson.kind : 'setsuzoku', lang), bad, lang));
   }
 
   // Goi y: dien dung san mot cau chua dung va khoa lai
@@ -120,7 +137,7 @@ class _KokugoWordScreenState extends State<KokugoWordScreen> {
       builder: (_) => HintDialog(onSelect: (opt) async {
         var target = -1;
         for (var i = 0; i < _ans.length; i++) {
-          if (_ans[i] != _correct(i) && !_locked.contains(i)) {
+          if (!_ok(i) && !_locked.contains(i)) {
             target = i;
             break;
           }
@@ -131,10 +148,17 @@ class _KokugoWordScreenState extends State<KokugoWordScreen> {
         }
         final ok = await rs.spendStars(opt.cost);
         if (!ok || !mounted) return;
-        final w = _correct(target);
+        var w = _correct(target);
+        final any = _anyOf(target);
+        if (any.isNotEmpty) {
+          // ほかの 問題で つかっていない かん字を えらぶ
+          w = any.firstWhere((k) => !List.generate(_ans.length, (j) => j).any((j) => j != target && _ans[j] == k), orElse: () => w);
+        }
         setState(() {
-          for (var j = 0; j < _ans.length; j++) {
-            if (_ans[j] == w && j != target) _ans[j] = '';
+          if (!_reuse) {
+            for (var j = 0; j < _ans.length; j++) {
+              if (_ans[j] == w && j != target) _ans[j] = '';
+            }
           }
           _ans[target] = w;
           _locked.add(target);
@@ -186,6 +210,7 @@ class _KokugoWordScreenState extends State<KokugoWordScreen> {
               style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
         ),
         if (l.kind == 'kotowaza') _kotoGuide(lang),
+        if (l.kind == 'tsunagi') _tsunagiGuide(lang),
         // khung chua cac tu de chon
         Padding(
           padding: const EdgeInsets.fromLTRB(12, 4, 12, 4),
@@ -224,7 +249,7 @@ class _KokugoWordScreenState extends State<KokugoWordScreen> {
           child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
             _ToolBtn(icon: Icons.refresh, label: 'リセット', color: Colors.red, onTap: _onReset),
             _ToolBtn(icon: Icons.lightbulb, label: 'ヒント', color: Colors.amber, onTap: _onHint),
-            if (widget.lesson.kind != 'kotowaza')
+            if (widget.lesson.kind != 'kotowaza' && widget.lesson.kind != 'doyomi')
             _ToolBtn(
                 icon: Icons.menu_book,
                 label: 'いみ',
@@ -249,8 +274,8 @@ class _KokugoWordScreenState extends State<KokugoWordScreen> {
   }
 
   Widget _chip(String w) {
-    final used = _ans.contains(w);
-    final lockedUse = _locked.any((j) => _ans[j] == w);
+    final used = !_reuse && _ans.contains(w);
+    final lockedUse = !_reuse && _locked.any((j) => _ans[j] == w);
     return GestureDetector(
       onTap: () => _pick(w),
       child: Opacity(
@@ -263,6 +288,77 @@ class _KokugoWordScreenState extends State<KokugoWordScreen> {
             border: Border.all(color: const Color(0xFF00897B), width: 2),
           ),
           child: Text(w, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+        ),
+      ),
+    );
+  }
+
+  // つなぎことばって なあに？ -- sach: trang 4 (khung giai thich)
+  Widget _tsunagiGuide(String lang) {
+    final rows = <List<String>>[
+      [
+        'だから・すると・それで・そこで・したがって',
+        lang == 'ja'
+            ? 'まえの ことが りゆうや げんいんに なって、つぎの ことが おこった ときに つかう。'
+            : lang == 'en'
+                ? 'The first thing is the reason or cause, and the next thing happens because of it.'
+                : 'Việc trước là lý do/nguyên nhân, và việc sau xảy ra do đó.',
+      ],
+      [
+        'だけど・しかし・けれども・でも・だが・ところが',
+        lang == 'ja'
+            ? 'まえと ちがう ことや、はんたいの ことを いう ときに つかう。'
+            : lang == 'en'
+                ? 'Used to say something different from, or opposite to, what came before.'
+                : 'Dùng để nói điều khác hoặc trái ngược với điều trước.',
+      ],
+      [
+        'さらに・そのうえ・しかも・そして・それに',
+        lang == 'ja'
+            ? 'まえの ことに、あとの ことを つけくわえる ときに つかう。'
+            : lang == 'en'
+                ? 'Used to add another thing to what came before.'
+                : 'Dùng để thêm một điều nữa vào điều trước.',
+      ],
+    ];
+    const colors = [Color(0xFFFFE0B2), Color(0xFFBBDEFB), Color(0xFFC8E6C9)];
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 2, 12, 2),
+      child: Container(
+        decoration: BoxDecoration(
+          color: const Color(0xFFE0F7FA),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.teal.shade300, width: 1.5),
+        ),
+        child: ExpansionTile(
+          tilePadding: const EdgeInsets.symmetric(horizontal: 10),
+          dense: true,
+          title: Text(
+              lang == 'ja' ? '📘 つなぎことばって なあに？' : (lang == 'en' ? '📘 What are connecting words?' : '📘 Từ nối là gì?'),
+              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+          childrenPadding: const EdgeInsets.fromLTRB(10, 0, 10, 8),
+          children: [
+            Text(
+              lang == 'ja'
+                  ? '文と 文、ことばと ことば などを つなぐ はたらきを もつ ことばの こと。'
+                  : lang == 'en'
+                      ? 'Words that join sentences to sentences, or words to words.'
+                      : 'Là những từ có tác dụng nối câu với câu, từ với từ.',
+              style: const TextStyle(fontSize: 12),
+            ),
+            const SizedBox(height: 6),
+            for (var i = 0; i < rows.length; i++)
+              Container(
+                width: double.infinity,
+                margin: const EdgeInsets.only(bottom: 4),
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(color: colors[i], borderRadius: BorderRadius.circular(8)),
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Text(rows[i][0], style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+                  Text('➡ ${rows[i][1]}', style: const TextStyle(fontSize: 12)),
+                ]),
+              ),
+          ],
         ),
       ),
     );

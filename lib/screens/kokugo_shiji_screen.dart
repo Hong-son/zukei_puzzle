@@ -7,8 +7,11 @@ import '../services/locale_service.dart';
 import '../services/progress_service.dart';
 import '../services/kokugo_engine.dart';
 import '../widgets/hint_dialog.dart';
+import '../widgets/word_comic.dart';
+import '../services/word_help.dart';
 import 'reward_screen.dart';
 
+// (+ 'erabu': あう ことばを えらぼう -- cung la chon 1 trong 3, nhung chon bang ア・イ・ウ va co nut 📖 giai thich tu)
 // こそあど ことば: ──せんの ことば(これ・それ・そこ…)が さす ものを 3つから えらんで ○を つける。
 // Cau hoi: cac doan thuong (doan gach chan la tu chi thi); lua chon o extra['opts']; dap an o reads.first cua doan blank.
 class KokugoShijiScreen extends StatefulWidget {
@@ -25,6 +28,7 @@ class _KokugoShijiScreenState extends State<KokugoShijiScreen> {
   int _tries = 0;
 
   List<KokugoItem> get _items => widget.lesson.items;
+  bool get _erabu => widget.lesson.kind == 'erabu';
 
   List<String> _opts(int i) => [for (final o in (_items[i].extra['opts'] as List? ?? const [])) o as String];
   String _answer(int i) => _items[i].firstBlank.reads.first;
@@ -72,7 +76,7 @@ class _KokugoShijiScreenState extends State<KokugoShijiScreen> {
       );
       return;
     }
-    _snack(KokugoEngine.withWrong(KokugoEngine.wrongMessage('shiji', lang), bad, lang));
+    _snack(KokugoEngine.withWrong(KokugoEngine.wrongMessage(_erabu ? 'erabu' : 'shiji', lang), bad, lang));
   }
 
   // Goi y: loai bo 1 lua chon sai cua cau dau tien chua dung + chi cach tim
@@ -109,7 +113,13 @@ class _KokugoShijiScreenState extends State<KokugoShijiScreen> {
           builder: (ctx) => AlertDialog(
             title: Text(lang == 'ja' ? 'ヒント' : (lang == 'en' ? 'Hint' : 'Gợi ý')),
             content: Text(
-              lang == 'ja'
+              _erabu
+                  ? (lang == 'ja'
+                      ? '（　）に ことばを いれて、文を ぜんぶ よんでみよう。いみが とおる ことばが せいかい！\n「いみ」ボタンで ことばの いみも しらべられるよ。\n（まちがいの こたえを 1つ けしたよ）'
+                      : lang == 'en'
+                          ? 'Put each word into the blank and read the whole sentence. The one that makes sense is correct!\nThe 「いみ」 button explains each word.\n(One wrong choice has been crossed out.)'
+                          : 'Hãy đặt từng từ vào chỗ trống và đọc cả câu. Từ nào làm câu có nghĩa là đúng!\nNút 「いみ」 giải thích nghĩa từng từ.\n(Một đáp án sai đã bị gạch bỏ.)')
+                  : lang == 'ja'
                   ? '「これ・それ・あれ・どれ」や「ここ・そこ」は、すこし まえに でてきた ことばを さしているよ。\n「それ」の ところに、えらんだ ことばを いれて よんでみよう。いみが とおれば せいかい！\n（まちがいの こたえを 1つ けしたよ）'
                   : lang == 'en'
                       ? 'Words like これ/それ/あれ and ここ/そこ point to something mentioned just before.\nPut your choice in place of the underlined word and read it. If it makes sense, it is right!\n(One wrong choice has been crossed out.)'
@@ -188,6 +198,15 @@ class _KokugoShijiScreenState extends State<KokugoShijiScreen> {
           child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
             _ToolBtn(icon: Icons.refresh, label: 'リセット', color: Colors.red, onTap: _onReset),
             _ToolBtn(icon: Icons.lightbulb, label: 'ヒント', color: Colors.amber, onTap: _onHint),
+            if (_erabu)
+              _ToolBtn(
+                  icon: Icons.menu_book,
+                  label: 'いみ',
+                  color: Colors.teal,
+                  onTap: () => showWordHelpDialog(
+                      context,
+                      [for (var i = 0; i < _items.length; i++) for (final w in _opts(i)) HelpEntry(w)],
+                      context.read<LocaleService>().lang)),
             ElevatedButton.icon(
               onPressed: _onCheck,
               icon: const Icon(Icons.check_circle, size: 18),
@@ -208,7 +227,7 @@ class _KokugoShijiScreenState extends State<KokugoShijiScreen> {
   Widget _item(int i) {
     final it = _items[i];
     final opts = _opts(i);
-    const circ = ['①', '②', '③', '④'];
+    final circ = _erabu ? const ['ア', 'イ', 'ウ', 'エ'] : const ['①', '②', '③', '④'];
     final spans = <InlineSpan>[];
     for (final p in it.parts) {
       if (p.blank) continue;

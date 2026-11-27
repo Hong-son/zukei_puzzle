@@ -10,6 +10,7 @@ import 'half_category_screen.dart';
 import 'dotsquare_category_screen.dart';
 import 'view_menu_screen.dart';
 import 'clock_category_screen.dart';
+import 'fold_category_screen.dart';
 
 // Man hinh cap 2: danh sach cac dang bai cua mot mon (sansu hoac kokugo).
 class SubjectScreen extends StatelessWidget {
@@ -75,23 +76,23 @@ class SubjectScreen extends StatelessWidget {
     {
       'id': 'clock',
       'icon': '🕐',
-      'name': {'ja': 'とけいの はり', 'en': 'Clock Hands', 'vi': 'Kim đồng hồ'},
-      'desc': {'ja': 'はりを うごかして じこくを あわせよう', 'en': 'Set the hands and tell the time', 'vi': 'Chỉnh kim và đọc giờ'},
+      'name': {'ja': 'とけい', 'en': 'Clocks', 'vi': 'Đồng hồ'},
+      'desc': {
+        'ja': 'はり・じこくと じかん・かがみの 中の とけい',
+        'en': 'Hands, time & duration, clock in a mirror',
+        'vi': 'Kim đồng hồ, giờ & thời gian, đồng hồ trong gương'
+      },
       'color': Color(0xFFEC407A),
       'mode': 'clock',
       'subject': 'sansu',
     },
     {
-      'id': 'jikan',
-      'icon': '⏱️',
-      'name': {'ja': 'じこくと じかん', 'en': 'Time and Duration', 'vi': 'Giờ và khoảng thời gian'},
-      'desc': {
-        'ja': 'あと なんじかん？・かがみの 中の とけい',
-        'en': 'How long until...? / Clock in a mirror',
-        'vi': 'Còn bao lâu? / Đồng hồ trong gương'
-      },
-      'color': Color(0xFFD81B60),
-      'mode': 'jikan',
+      'id': 'fold',
+      'icon': '✂️',
+      'name': {'ja': 'たいしょうな かたち', 'en': 'Symmetric Shapes', 'vi': 'Hình đối xứng'},
+      'desc': {'ja': 'おって きって ひらくと…？', 'en': 'Fold, cut, unfold', 'vi': 'Gấp, cắt rồi mở ra'},
+      'color': Color(0xFF00897B),
+      'mode': 'fold',
       'subject': 'sansu',
     },
     {
@@ -119,8 +120,8 @@ class SubjectScreen extends StatelessWidget {
         return DotSquareCategoryScreen(category: cat);
       case 'clock':
         return ClockCategoryScreen(category: cat);
-      case 'jikan':
-        return ClockCategoryScreen(category: cat, kind: 'span');
+      case 'fold':
+        return FoldCategoryScreen(category: cat);
       case 'view':
         return ViewMenuScreen(category: cat);
       default:

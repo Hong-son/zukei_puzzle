@@ -9,8 +9,7 @@ import 'clock_span_screen.dart';
 
 class ClockCategoryScreen extends StatelessWidget {
   final Map<String, dynamic> category;
-  final String kind; // 'hands' = とけいの はり | 'span' = じこくと じかん (+ かがみの 中の とけい)
-  const ClockCategoryScreen({super.key, required this.category, this.kind = 'hands'});
+  const ClockCategoryScreen({super.key, required this.category});
 
   // Bai mau tu sach (trang 3: とけいの はり)
   static const List<ClockLesson> samples = [
@@ -79,11 +78,11 @@ class ClockCategoryScreen extends StatelessWidget {
     final catName = (category['name'] as Map<String, String>)[lang] ?? '';
     final color = category['color'] as Color;
     final doneLabel = lang == 'ja' ? 'かいクリア' : lang == 'en' ? 'times cleared' : 'lần hoàn thành';
-    final isSpan = kind == 'span';
-    final kinds = isSpan ? const ['span', 'mirror'] : const ['hands'];
+    // 1 subcategory: とけいの はり + じこくと じかん + かがみの 中の とけい
     final lessons = [
-      ...(isSpan ? spanSamples : samples),
-      ...progress.generatedClocks.where((e) => kinds.contains(e.kind)),
+      ...samples,
+      ...spanSamples,
+      ...progress.generatedClocks,
     ];
 
     return Scaffold(
@@ -95,12 +94,15 @@ class ClockCategoryScreen extends StatelessWidget {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
           final lv = 1 + (DateTime.now().millisecond % 3);
-          if (!isSpan) {
-            progress.addGeneratedClock(ClockEngine.generate(level: lv));
-          } else if (DateTime.now().microsecond % 2 == 0) {
-            progress.addGeneratedClock(ClockEngine.generateSpan(level: lv));
-          } else {
-            progress.addGeneratedClock(ClockEngine.generateMirror(level: lv));
+          switch (DateTime.now().microsecondsSinceEpoch % 3) {
+            case 0:
+              progress.addGeneratedClock(ClockEngine.generate(level: lv));
+              break;
+            case 1:
+              progress.addGeneratedClock(ClockEngine.generateSpan(level: lv));
+              break;
+            default:
+              progress.addGeneratedClock(ClockEngine.generateMirror(level: lv));
           }
         },
         backgroundColor: color,
@@ -134,7 +136,7 @@ class ClockCategoryScreen extends StatelessWidget {
                   ),
                   title: Text(lesson.title[lang] ?? '', style: const TextStyle(fontWeight: FontWeight.bold)),
                   subtitle: Text(
-                      '${lesson.questions.length}もん  Level: ${'⭐' * lesson.difficulty}${done ? '   ✓ $n $doneLabel' : ''}'),
+                      '${lesson.questions.length}もん${done ? '   ✓ $n $doneLabel' : ''}'),
                   trailing: const Icon(Icons.arrow_forward_ios),
                   onTap: () => Navigator.push(
                     context,

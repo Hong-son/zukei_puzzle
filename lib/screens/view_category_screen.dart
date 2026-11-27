@@ -69,7 +69,7 @@ class ViewCategoryScreen extends StatelessWidget {
                   ),
                   title: Text(lesson.title[lang] ?? '', style: const TextStyle(fontWeight: FontWeight.bold)),
                   subtitle: Text(
-                      'Level: ${'⭐' * lesson.difficulty}   ${lesson.items.length}もん${done ? '   ✓ $n $doneLabel' : ''}'),
+                      '${lesson.items.length}もん${done ? '   ✓ $n $doneLabel' : ''}'),
                   trailing: const Icon(Icons.arrow_forward_ios),
                   onTap: () => Navigator.push(
                     context,

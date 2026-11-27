@@ -136,7 +136,7 @@ class _PyramidCategoryScreenState extends State<PyramidCategoryScreen> {
                   title: Text(lesson.title[lang] ?? '',
                       style: const TextStyle(fontWeight: FontWeight.bold)),
                   subtitle: Text(
-                      '$kind  ${lesson.levels}だん  Level: ${'⭐' * lesson.difficulty}${done ? '   ✓ $n $doneLabel' : ''}'),
+                      '$kind  ${lesson.levels}だん${done ? '   ✓ $n $doneLabel' : ''}'),
                   trailing: const Icon(Icons.arrow_forward_ios),
                   onTap: () => Navigator.push(
                     context,

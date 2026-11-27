@@ -79,7 +79,7 @@ class KokugoCategoryScreen extends StatelessWidget {
                   ),
                   title: Text(lesson.title[lang] ?? '', style: const TextStyle(fontWeight: FontWeight.bold)),
                   subtitle: Text(
-                      'Level: ${'⭐' * lesson.difficulty}   ${lesson.items.length}もん${done ? '   ✓ $n $doneLabel' : ''}'),
+                      '${lesson.items.length}もん${done ? '   ✓ $n $doneLabel' : ''}'),
                   trailing: const Icon(Icons.arrow_forward_ios),
                   onTap: () => Navigator.push(
                     context,
@@ -88,10 +88,10 @@ class KokugoCategoryScreen extends StatelessWidget {
                       if (lesson.kind == 'hantai') return KokugoHantaiScreen(lesson: lesson);
                       if (lesson.kind == 'ruigi') return KokugoRuigiScreen(lesson: lesson);
                       if (lesson.kind == 'kanyou') return KokugoIdiomScreen(lesson: lesson);
-                      if (lesson.kind == 'setsuzoku') return KokugoWordScreen(lesson: lesson);
+                      if (lesson.kind == 'setsuzoku' || lesson.kind == 'tsunagi' || lesson.kind == 'doyomi') return KokugoWordScreen(lesson: lesson);
                       if (lesson.kind == 'narabe') return KokugoNarabeScreen(lesson: lesson);
                       if (lesson.kind == 'bunsaku') return KokugoBunScreen(lesson: lesson);
-                      if (lesson.kind == 'shiji') return KokugoShijiScreen(lesson: lesson);
+                      if (lesson.kind == 'shiji' || lesson.kind == 'erabu') return KokugoShijiScreen(lesson: lesson);
                       if (lesson.kind == 'kakijun') return KokugoKakijunScreen(lesson: lesson);
                       if (lesson.kind == 'shugo') return KokugoShugoScreen(lesson: lesson);
                       if (lesson.kind == 'kotowaza') return KokugoWordScreen(lesson: lesson);

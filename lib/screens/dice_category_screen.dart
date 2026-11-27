@@ -381,7 +381,6 @@ class _DiceCategoryScreenState extends State<DiceCategoryScreen> {
               final lesson = lessons[index];
               final String id = lesson.id as String;
               final Map<String, String> t = lesson.title as Map<String, String>;
-              final int diff = lesson.difficulty as int;
               final n = progress.completions(id);
               final done = n > 0;
               return Card(
@@ -399,7 +398,7 @@ class _DiceCategoryScreenState extends State<DiceCategoryScreen> {
                                 color: Colors.white, fontWeight: FontWeight.bold)),
                   ),
                   title: Text(t[lang] ?? '', style: const TextStyle(fontWeight: FontWeight.bold)),
-                  subtitle: Text('Level: ${'⭐' * diff}${done ? '   ✓ $n $doneLabel' : ''}'),
+                  subtitle: done ? Text('✓ $n $doneLabel') : null,
                   trailing: const Icon(Icons.arrow_forward_ios),
                   onTap: () => Navigator.push(
                     context,

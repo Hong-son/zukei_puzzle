@@ -127,8 +127,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
               ),
               title: Text(lesson.title[lang] ?? '',
                   style: const TextStyle(fontWeight: FontWeight.bold)),
-              subtitle: Text(
-                  'Level: ${'⭐' * lesson.difficulty}${done ? '   ✓ $n $doneLabel' : ''}'),
+              subtitle: done ? Text('✓ $n $doneLabel') : null,
               trailing: const Icon(Icons.arrow_forward_ios),
               onTap: () => Navigator.push(
                 context,

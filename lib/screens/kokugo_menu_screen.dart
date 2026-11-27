@@ -14,13 +14,13 @@ class KokugoMenuScreen extends StatelessWidget {
   static const List<Map<String, dynamic>> kinds = [
     {
       'id': 'kaki',
-      'kinds': ['kaki', 'doon'],
+      'kinds': ['kaki', 'doon', 'doyomi'],
       'icon': '✍️',
       'name': {'ja': 'かん字を かこう', 'en': 'Write the Kanji', 'vi': 'Viết chữ Hán'},
       'desc': {
-        'ja': 'かたかな・おなじ おとの ことばを かん字に',
-        'en': 'Katakana / same-sound words to kanji',
-        'vi': 'Katakana / từ đồng âm → chữ Hán'
+        'ja': 'かたかな・おくりがな・おなじ おと・おなじ よみ',
+        'en': 'Katakana, okurigana, same-sound & same-reading kanji',
+        'vi': 'Katakana, okurigana, đồng âm & cùng cách đọc'
       },
       'color': Color(0xFF5C6BC0),
     },
@@ -46,25 +46,25 @@ class KokugoMenuScreen extends StatelessWidget {
     },
     {
       'id': 'imi',
-      'kinds': ['hantai', 'ruigi'],
+      'kinds': ['hantai', 'ruigi', 'erabu', 'hantaigo'],
       'icon': '↔️',
       'name': {'ja': 'ことばの いみ', 'en': 'Word Meanings', 'vi': 'Nghĩa của từ'},
       'desc': {
-        'ja': 'はんたいの いみ・にた いみ',
-        'en': 'Opposite & similar meanings',
-        'vi': 'Trái nghĩa & đồng nghĩa'
+        'ja': 'はんたいの いみ・にた いみ・あう ことば',
+        'en': 'Opposite & similar meanings / best word',
+        'vi': 'Trái nghĩa, đồng nghĩa & chọn từ hợp nhất'
       },
       'color': Color(0xFFAB47BC),
     },
     {
       'id': 'ireru',
-      'kinds': ['kanyou', 'setsuzoku', 'kotowaza'],
+      'kinds': ['kanyou', 'setsuzoku', 'tsunagi', 'kotowaza'],
       'icon': '🧩',
       'name': {'ja': 'ことばを いれよう', 'en': 'Fill in the Word', 'vi': 'Điền từ vào chỗ trống'},
       'desc': {
-        'ja': 'かんようく・ことわざ・せつぞくの ことば',
-        'en': 'Idioms, proverbs & conjunctions',
-        'vi': 'Quán dụng ngữ, tục ngữ & từ nối'
+        'ja': 'かんようく・ことわざ・せつぞくの ことば・つなぎことば',
+        'en': 'Idioms, proverbs, fill-in words & connecting words',
+        'vi': 'Quán dụng ngữ, tục ngữ, điền từ & từ nối'
       },
       'color': Color(0xFF43A047),
     },

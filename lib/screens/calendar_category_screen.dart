@@ -99,7 +99,7 @@ class CalendarCategoryScreen extends StatelessWidget {
                   ),
                   title: Text(lesson.title[lang] ?? '', style: const TextStyle(fontWeight: FontWeight.bold)),
                   subtitle: Text(
-                      '${lesson.questions.length}もん  Level: ${'⭐' * lesson.difficulty}${done ? '   ✓ $n $doneLabel' : ''}'),
+                      '${lesson.questions.length}もん${done ? '   ✓ $n $doneLabel' : ''}'),
                   trailing: const Icon(Icons.arrow_forward_ios),
                   onTap: () => Navigator.push(
                     context,

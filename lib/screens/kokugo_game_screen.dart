@@ -231,6 +231,27 @@ class _KokugoGameScreenState extends State<KokugoGameScreen> {
           child: Text(l.question[lang] ?? '',
               style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
         ),
+        if (_isKaki && l.bank.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(12, 4, 12, 4),
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.black54, width: 1.5),
+              ),
+              child: Wrap(
+                alignment: WrapAlignment.center,
+                spacing: 18,
+                runSpacing: 6,
+                children: [
+                  for (final w in l.bank) Text(w, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                ],
+              ),
+            ),
+          ),
         Expanded(
           child: Align(
             alignment: Alignment.topCenter,
