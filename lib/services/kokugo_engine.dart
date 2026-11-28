@@ -5,7 +5,7 @@ import 'stroke_data.dart';
 // Bai 国語 (lop 1): viet chu Han (kaki) va viet cach doc (yomi).
 // Kho tu vung va cau vi du do ta tu soan.
 class KokugoEngine {
-  static const List<String> kinds = ['kaki', 'yomi', 'hitsujun', 'kakijun', 'shugo', 'kotowaza', 'hantai', 'kanyou', 'setsuzoku', 'doon', 'ruigi', 'narabe', 'bunsaku', 'shiji', 'erabu', 'tsunagi', 'doyomi', 'hantaigo'];
+  static const List<String> kinds = ['kaki', 'yomi', 'hitsujun', 'kakijun', 'shugo', 'kotowaza', 'hantai', 'kanyou', 'setsuzoku', 'doon', 'ruigi', 'narabe', 'bunsaku', 'shiji', 'erabu', 'tsunagi', 'doyomi', 'hantaigo', 'kosoado'];
 
   static const Map<String, Map<String, String>> baseNames = {
     'kaki': {'ja': 'かん字を かこう', 'en': 'Write the Kanji', 'vi': 'Viết chữ Hán'},
@@ -25,6 +25,7 @@ class KokugoEngine {
     'erabu': {'ja': 'あう ことばを えらぼう', 'en': 'Choose the Best Word', 'vi': 'Chọn từ phù hợp nhất'},
     'tsunagi': {'ja': 'つなぎことば', 'en': 'Connecting Words', 'vi': 'Từ nối (つなぎことば)'},
     'doyomi': {'ja': 'おなじ よみの かん字', 'en': 'Kanji with the Same Reading', 'vi': 'Chữ Hán cùng cách đọc'},
+    'kosoado': {'ja': 'こそあど ことばを かこう', 'en': 'Fill in This / That Words', 'vi': 'Điền この・その・あの・どの'},
     'hantaigo': {'ja': 'はんたいの いみの ことば', 'en': 'Opposite Words', 'vi': 'Từ trái nghĩa'},
   };
 
@@ -102,6 +103,13 @@ class KokugoEngine {
         'ja': 'ワクの 中から おなじ よみの かん字を 見つけて、□に かきましょう。かん字は 一かいずつしか つかえません。',
         'en': 'Find two kanji in the box with the given reading and put them in the boxes. Use each kanji only once.',
         'vi': 'Tìm trong khung các chữ Hán có cùng cách đọc đã cho rồi điền vào ô. Mỗi chữ chỉ dùng một lần.',
+      };
+    }
+    if (kind == 'kosoado') {
+      return {
+        'ja': 'つぎの □に「この・その・あの・どの」の どれかを、えらんで かきましょう。',
+        'en': 'Choose one of この・その・あの・どの to fill each box.',
+        'vi': 'Chọn một trong この・その・あの・どの điền vào mỗi ô.',
       };
     }
     if (kind == 'hantaigo') {
@@ -211,6 +219,13 @@ class KokugoEngine {
           : lang == 'en'
               ? 'Something is wrong. Put your choice in place of the underlined word and read it again'
               : 'Có chỗ chưa đúng. Hãy thay từ gạch chân bằng đáp án đã chọn rồi đọc lại';
+    }
+    if (kind == 'kosoado') {
+      return lang == 'ja'
+          ? 'ちがう ところが あるよ。ものが ちかいか とおいか、はっきりしないか よく かんがえよう'
+          : lang == 'en'
+              ? 'Something is wrong. Think: is the thing near, far, or unclear?'
+              : 'Có chỗ chưa đúng. Hãy nghĩ xem vật đó ở gần, ở xa hay chưa rõ';
     }
     if (kind == 'erabu') {
       return lang == 'ja'
@@ -348,7 +363,44 @@ class KokugoEngine {
       ['イ', '一', '足', ['そく', 'いっそく'], 'のくつ。'],
       ['ウ', '五と八を', '足', ['た'], 'す。'],
     ],
+    [
+      ['ア', '', '休', ['きゅう'], '日'],
+      ['イ', 'こころが', '休', ['やす'], 'まる。'],
+      ['ウ', 'ひる', '休', ['やす'], 'み'],
+    ],
+    [
+      ['ア', '水を', '入', ['い'], 'れる。'],
+      ['イ', 'きょうしつに', '入', ['はい'], 'る。'],
+      ['ウ', '', '入', ['にゅう'], '学しき。'],
+    ],
+    [
+      ['ア', 'そとに', '出', ['で'], 'る。'],
+      ['イ', '手がみを', '出', ['だ'], 'す。'],
+      ['ウ', '', '出', ['しゅっ', 'しゅつ', 'しゅっぱつ'], 'ぱつする。'],
+    ],
   ];
+
+  // かん字を かこう (ページ1 (1)): かたかなを かん字に ①〜⑨ を 3もんずつ
+  static List<List<KokugoItem>> _kakiPage1() {
+    KokugoItem ki(int no, List<KokugoPart> parts) => KokugoItem(label: _circ[no], parts: parts);
+    return [
+      [
+        ki(0, [_t('もうどう'), _b('犬', 'ケン')]),
+        ki(1, [_b('竹', 'タケ'), _t('とんぼ')]),
+        ki(2, [_b('早口', 'ハヤ|クチ'), _t('で はなす。')]),
+      ],
+      [
+        ki(3, [_t('しゃしんを'), _b('見', 'ミ'), _t('る。')]),
+        ki(4, [_t('はしらが'), _b('立', 'タ'), _t('つ。')]),
+        ki(5, [_t('む'), _b('口', 'クチ'), _t('な'), _b('人', 'ヒト'), _t('。')]),
+      ],
+      [
+        ki(6, [_t('にわの ざっ'), _b('草', 'ソウ'), _t('。')]),
+        ki(7, [_t('さくら'), _b('貝', 'ガイ'), _t('を ひろう。')]),
+        ki(8, [_b('目', 'モク'), _t('てきを もつ。')]),
+      ],
+    ];
+  }
 
   // ページ3 (2): ──せんの かん字の よみ。（ ）の ひらがなは 本に ふりがなとして 出ている よみ
   static const List<String> _yomiSent2 = [
@@ -976,6 +1028,36 @@ class KokugoEngine {
         parts: [_t(e[0]), _b(e[1], ''), if (e[2].isNotEmpty) _t(e[2])],
       );
 
+  // kosoado (こそあどことば): [まえ, こたえ, あと]. ことばは なんども つかえる (extra.reuse)
+  static const List<String> _kosoadoWords = ['この', 'その', 'あの', 'どの'];
+  static const List<List<String>> _kosoadoBook = [
+    ['きみの もっている', 'その', 'けしゴムを、ぼくに かして くれないか。'],
+    ['ぼくは、いつか とおくに 見《み》える', 'あの', '山《やま》の ちょう上《じょう》に のぼってみたい。'],
+    ['ずいぶん あるいたね。いったい', 'どの', 'くらい じかんが たっただろう。'],
+    ['わたしが きている', 'この', 'セーターは、ははの 手《て》づくりです。'],
+    ['校《こう》ていの すみに、ピンクの 花《はな》が 見《み》えますね。', 'あの', '花は、一年生《いちねんせい》が せわを している コスモスです。'],
+  ];
+  static const List<List<String>> _kosoadoExtra = [
+    ['わたしが いま もっている', 'この', 'ほんは、たからものです。'],
+    ['あなたが かいた', 'その', 'えは、とても じょうずですね。'],
+    ['むこうに 見える', 'あの', 'たてものは、しょうがっこうです。'],
+    ['ぼくが いま はいている', 'この', 'くつは、あたらしいです。'],
+    ['あそこに いる', 'あの', '犬は、ぼくの 犬です。'],
+    ['ここに ある 三まいの 絵の うち、', 'どの', '絵が いちばん すきですか。'],
+    ['あなたが いま つかっている', 'その', 'えんぴつを かして ください。'],
+    ['とおくに 見える', 'あの', '山を こえると、うみが あります。'],
+    ['', 'どの', 'かさが きみの ですか。'],
+  ];
+  static KokugoItem _kosoadoItem(int no, List<String> e) => KokugoItem(
+        label: '（${no + 1}）',
+        parts: [
+          if (e[0].isNotEmpty) _t(e[0]),
+          KokugoPart('', blank: true, reads: [e[1]]),
+          _t(e[2]),
+        ],
+        extra: const {'reuse': true},
+      );
+
   static KokugoItem _tsunagiItem(int no, List<String> e) => KokugoItem(
         label: '（${no + 1}）',
         parts: [
@@ -1017,6 +1099,11 @@ class KokugoEngine {
     ['じまんする', 'あてる', ['クイズの こたえを あてて、みんなに じまんした。', 'ぼくが あてたと じまんする ともだちが いる。']],
     ['はずかしい', 'しっぱい', ['はっぴょうで しっぱいして、はずかしかった。', 'しっぱいした ことが はずかしくて、かおが あかく なった。']],
     ['あんしん', 'みつかる', ['なくした さいふが みつかって、あんしんした。', 'いなく なった いぬが みつかったと きいて、あんしんした。']],
+    // 本の 10 (ページ5 ⑥)
+    ['こまる', 'やくそく', ['やくそくの じかんに まにあわなくて、こまりました。', 'こまっている ともだちと、たすけあう やくそくを しました。']],
+    ['しんぱい', 'ともだち', ['ともだちが びょうきで、しんぱいです。', 'しんぱいして、ともだちに でんわを しました。']],
+    ['きまりが わるい', 'パーティー', ['パーティーで なまえを まちがえて、きまりが わるかった。', 'きまりが わるくて、パーティーを はやく かえりました。']],
+    ['はらが たつ', 'たいせつな', ['たいせつな おもちゃを こわされて、はらが たった。', 'はらが たっても、たいせつな ともだちには やさしく したい。']],
   ];
 
   // bunsaku: [tu 1, tu 2, [cac cau mau]] (cau mau de tu cham ○✕)
@@ -1100,6 +1187,13 @@ class KokugoEngine {
     'あてる': ['あてる', 'あて', 'あてた', 'あてて', 'あてら'],
     'しっぱい': ['しっぱい'],
     'みつかる': ['みつかる', 'みつかり', 'みつかって', 'みつかった', 'みつから'],
+    'こまる': ['こまる', 'こまり', 'こまって', 'こまった', 'こまら', '困'],
+    'やくそく': ['やくそく', '約束'],
+    'ともだち': ['ともだち', '友だち', '友達'],
+    'きまりが わるい': ['きまりが わるい', 'きまりが わるく', 'きまりが わるかった', 'きまりがわるい', 'きまりがわるく', 'きまりがわるかった'],
+    'パーティー': ['パーティー', 'パーティ'],
+    'はらが たつ': ['はらが たつ', 'はらが たち', 'はらが たった', 'はらが たって', 'はらが たた', 'はらがたつ', 'はらがたち', 'はらがたった', 'はらがたって', 'はらがたた', '腹が立', '腹がた'],
+    'たいせつな': ['たいせつ', '大せつ', '大切'],
   };
 
   // bunsaku: nghia cua tu, giai thich de hieu cho tre (ja / en / vi)
@@ -1166,6 +1260,13 @@ class KokugoEngine {
     'じまんする': {'ja': 'じぶんの いい ところや とくいな ことを、ほかの ひとに えらそうに 見せたり いったり する こと。', 'en': 'To show off or boast about something you are proud of.', 'vi': 'Khoe khoang điều mình giỏi hoặc điều mình tự hào với người khác.'},
     'あてる': {'ja': 'もんだいの こたえを ぴたりと いう こと。ほかに、ねらった ところに ぶつける ことも あてると いうよ。', 'en': 'To guess the right answer. (It can also mean to hit a target.)', 'vi': 'Đoán trúng đáp án. (Cũng có nghĩa là ném/đánh trúng mục tiêu.)'},
     'しっぱい': {'ja': 'うまく いかなかった こと。まちがえて しまう こと。', 'en': 'A failure; when things did not go well or you made a mistake.', 'vi': 'Thất bại, làm không thành hoặc mắc lỗi.'},
+    'こまる': {'ja': 'どうして いいか わからなくて、なやんで しまう こと。', 'en': 'Being in trouble and not knowing what to do.', 'vi': 'Rắc rối, khó xử, không biết phải làm sao.'},
+    'やくそく': {'ja': 'ひとと「こうしようね」と かたく きめる こと。', 'en': 'A promise; a firm agreement with someone to do something.', 'vi': 'Lời hứa, thỏa thuận chắc chắn với người khác.'},
+    'ともだち': {'ja': 'いっしょに あそんだり はなしたり する、なかの いい ひと。', 'en': 'A friend; someone you like to play and talk with.', 'vi': 'Bạn bè, người chơi và trò chuyện thân thiết.'},
+    'きまりが わるい': {'ja': 'ひとの まえで しっぱいして、はずかしくて きまずい きもち。', 'en': 'Feeling awkward and embarrassed in front of others, for example after a mistake.', 'vi': 'Cảm giác ngượng ngùng, xấu hổ trước mặt người khác.'},
+    'パーティー': {'ja': 'みんなで あつまって、たべたり あそんだり して おいわいを する かい。', 'en': 'A party where people gather to eat, play and celebrate.', 'vi': 'Bữa tiệc, mọi người tụ họp ăn uống vui chơi chúc mừng.'},
+    'はらが たつ': {'ja': 'いやな ことが あって、おこりたく なる こと。', 'en': 'To get angry; feeling mad because of something unpleasant.', 'vi': 'Nổi giận, tức vì chuyện khó chịu.'},
+    'たいせつな': {'ja': 'とても だいじで、おろそかに できない こと。', 'en': 'Very important; something you must treat with care.', 'vi': 'Quan trọng, quý giá, không thể xem nhẹ.'},
     'みつかる': {'ja': 'さがして いた ものが 見つけられる こと。かくれていた ものが 見られて しまう ことも いうよ。', 'en': 'To be found; something you were looking for turns up.', 'vi': 'Được tìm thấy; thứ đang tìm đã xuất hiện.'},
   };
 
@@ -1536,6 +1637,20 @@ class KokugoEngine {
             items: [for (var i = n * 3; i < n * 3 + 3; i++) _okuriItem(i, _okuriBook[i])],
             bank: _okuriBank,
           ),
+        // かん字を かこう (ページ1 (1)): 上の _kakiPage1
+        for (var n = 0; n < 3; n++)
+          KokugoLesson(
+            id: 'KK${(n + kakiExtra.length + kakiMore.length + 12).toString().padLeft(3, '0')}',
+            title: {
+              'ja': 'かん字を かこう ${n + kakiExtra.length + kakiMore.length + 12}',
+              'en': 'Write the Kanji ${n + kakiExtra.length + kakiMore.length + 12}',
+              'vi': 'Viết chữ Hán ${n + kakiExtra.length + kakiMore.length + 12}',
+            },
+            question: questionFor('kaki'),
+            kind: 'kaki',
+            difficulty: 2,
+            items: _kakiPage1()[n],
+          ),
         // かん字の よみ (本・名・文): 3 bai
         for (var n = 0; n < 3; n++)
           KokugoLesson(
@@ -1569,8 +1684,8 @@ class KokugoEngine {
                 ..._yomiSentence(g, _yomiSent2[g]),
             ],
           ),
-        // かん字の よみ ページ1 (2): おなじ かん字の ちがう よみ (人・立・足) ① ② ③ を 1つずつ
-        for (var n = 0; n < 3; n++)
+        // かん字の よみ ページ1 (2): おなじ かん字の ちがう よみ (人・立・足 / 休・入・出) を 1つずつ
+        for (var n = 0; n < _yomiSame.length; n++)
           KokugoLesson(
             id: 'KY${(n + 27).toString().padLeft(3, '0')}',
             title: {
@@ -1583,7 +1698,7 @@ class KokugoEngine {
             difficulty: 2,
             items: [
               for (final e in _yomiSame[n])
-                KokugoItem(label: '${_circ[n]}${e[0]}', parts: [
+                KokugoItem(label: '${_circ[n % 3]}${e[0]}', parts: [
                   if ((e[1] as String).isNotEmpty) _t(e[1] as String),
                   _y(e[2] as String, (e[3] as List).cast<String>()),
                   if ((e[4] as String).isNotEmpty) _t(e[4] as String),
@@ -1865,6 +1980,23 @@ class KokugoEngine {
               for (var i = n * 3; i < (n == 0 ? 3 : 5); i++) _tsunagiItem(i, _tsunagiBook[i]),
             ],
             bank: _tsunagiWords,
+          ),
+        // こそあど ことば: 本の 5 (1)〜(5) を 3・2 もんに わける
+        for (var n = 0; n < 2; n++)
+          KokugoLesson(
+            id: 'KS00${n + 1}',
+            title: {
+              'ja': 'こそあど ことばを かこう ${n + 1}',
+              'en': 'Fill in This / That Words ${n + 1}',
+              'vi': 'Điền この・その・あの・どの ${n + 1}',
+            },
+            question: questionFor('kosoado'),
+            kind: 'kosoado',
+            difficulty: 2,
+            items: [
+              for (var i = n * 3; i < (n == 0 ? 3 : 5); i++) _kosoadoItem(i, _kosoadoBook[i]),
+            ],
+            bank: _kosoadoWords,
           ),
         // おなじ よみの かん字: 本の 2 ② の 4つの よみを 2つずつの 問題に わける
         for (var n = 0; n < 2; n++)
@@ -2412,6 +2544,20 @@ class KokugoEngine {
         isAutoGenerated: true,
         items: [for (var i = 0; i < use.length; i++) _hantaiItem(i, use[i])],
         bank: chars,
+      );
+    }
+    if (kind == 'kosoado') {
+      final count = lv == 1 ? 3 : 4;
+      final pool = [..._kosoadoBook, ..._kosoadoExtra]..shuffle(r);
+      return KokugoLesson(
+        id: id,
+        title: title,
+        question: questionFor('kosoado'),
+        kind: 'kosoado',
+        difficulty: lv,
+        isAutoGenerated: true,
+        items: [for (var i = 0; i < count; i++) _kosoadoItem(i, pool[i])],
+        bank: _kosoadoWords,
       );
     }
     if (kind == 'doyomi') {

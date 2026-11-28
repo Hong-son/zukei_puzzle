@@ -82,13 +82,13 @@ class KokugoMenuScreen extends StatelessWidget {
     },
     {
       'id': 'shiji',
-      'kinds': ['shiji'],
+      'kinds': ['shiji', 'kosoado'],
       'icon': '👉',
       'name': {'ja': 'こそあど ことば', 'en': 'This / That Words', 'vi': 'Từ chỉ thị (これ・それ…)'},
       'desc': {
-        'ja': 'これ・それ・そこは なにを さしているかな？',
-        'en': 'What does これ / それ / そこ point to?',
-        'vi': 'これ・それ・そこ chỉ vào cái gì?'
+        'ja': 'これ・それ・そこは なにを さしているかな？・この その あの どの',
+        'en': 'What does これ / それ point to? / この・その・あの・どの',
+        'vi': 'これ・それ・そこ chỉ cái gì? / điền この・その・あの・どの'
       },
       'color': Color(0xFFEF6C00),
     },

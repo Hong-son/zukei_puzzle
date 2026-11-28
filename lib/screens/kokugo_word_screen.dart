@@ -8,6 +8,7 @@ import '../services/progress_service.dart';
 import '../services/kokugo_engine.dart';
 import '../widgets/hint_dialog.dart';
 import '../widgets/word_comic.dart';
+import '../widgets/ruby_text.dart';
 import '../services/word_help.dart';
 import 'reward_screen.dart';
 
@@ -125,7 +126,7 @@ class _KokugoWordScreenState extends State<KokugoWordScreen> {
       return;
     }
     _snack(KokugoEngine.withWrong(KokugoEngine.wrongMessage(
-        const ['kotowaza', 'tsunagi', 'doyomi'].contains(widget.lesson.kind) ? widget.lesson.kind : 'setsuzoku', lang), bad, lang));
+        const ['kotowaza', 'tsunagi', 'doyomi', 'kosoado'].contains(widget.lesson.kind) ? widget.lesson.kind : 'setsuzoku', lang), bad, lang));
   }
 
   // Goi y: dien dung san mot cau chua dung va khoa lai
@@ -211,6 +212,7 @@ class _KokugoWordScreenState extends State<KokugoWordScreen> {
         ),
         if (l.kind == 'kotowaza') _kotoGuide(lang),
         if (l.kind == 'tsunagi') _tsunagiGuide(lang),
+        if (l.kind == 'kosoado') _kosoadoGuide(lang),
         // khung chua cac tu de chon
         Padding(
           padding: const EdgeInsets.fromLTRB(12, 4, 12, 4),
@@ -249,7 +251,7 @@ class _KokugoWordScreenState extends State<KokugoWordScreen> {
           child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
             _ToolBtn(icon: Icons.refresh, label: 'リセット', color: Colors.red, onTap: _onReset),
             _ToolBtn(icon: Icons.lightbulb, label: 'ヒント', color: Colors.amber, onTap: _onHint),
-            if (widget.lesson.kind != 'kotowaza' && widget.lesson.kind != 'doyomi')
+            if (widget.lesson.kind != 'kotowaza' && widget.lesson.kind != 'doyomi' && widget.lesson.kind != 'kosoado')
             _ToolBtn(
                 icon: Icons.menu_book,
                 label: 'いみ',
@@ -364,6 +366,85 @@ class _KokugoWordScreenState extends State<KokugoWordScreen> {
     );
   }
 
+  // こそあどことばって なあに？ -- sach: trang 4 (khung giai thich)
+  Widget _kosoadoGuide(String lang) {
+    final rows = <List<String>>[
+      [
+        'これ・ここ・この・こんな',
+        lang == 'ja'
+            ? 'じぶんに ちかい ところの ものを さす。'
+            : lang == 'en'
+                ? 'Points to something near the speaker.'
+                : 'Chỉ vật ở gần người nói.',
+      ],
+      [
+        'それ・そこ・その・そんな',
+        lang == 'ja'
+            ? 'あい手に ちかい ところの ものを さす。'
+            : lang == 'en'
+                ? 'Points to something near the listener.'
+                : 'Chỉ vật ở gần người nghe.',
+      ],
+      [
+        'あれ・あそこ・あの・あんな',
+        lang == 'ja'
+            ? 'とおい ところの ものを さす。'
+            : lang == 'en'
+                ? 'Points to something far away.'
+                : 'Chỉ vật ở xa.',
+      ],
+      [
+        'どれ・どこ・どの・どんな',
+        lang == 'ja'
+            ? 'どれか はっきり わからない ものを さす。'
+            : lang == 'en'
+                ? 'Points to something that is not clear (which one?).'
+                : 'Chỉ vật chưa rõ là cái nào.',
+      ],
+    ];
+    const colors = [Color(0xFFFFE0B2), Color(0xFFBBDEFB), Color(0xFFC8E6C9), Color(0xFFE1BEE7)];
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 2, 12, 2),
+      child: Container(
+        decoration: BoxDecoration(
+          color: const Color(0xFFE0F7FA),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.teal.shade300, width: 1.5),
+        ),
+        child: ExpansionTile(
+          tilePadding: const EdgeInsets.symmetric(horizontal: 10),
+          dense: true,
+          title: Text(
+              lang == 'ja' ? '📘 こそあどことばって なあに？' : (lang == 'en' ? '📘 What are こそあど words?' : '📘 Từ こそあど là gì?'),
+              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+          childrenPadding: const EdgeInsets.fromLTRB(10, 0, 10, 8),
+          children: [
+            Text(
+              lang == 'ja'
+                  ? '「これ」「それ」「あれ」「どれ」など「さししめす ことば」を「こそあどことば」と いいます。'
+                  : lang == 'en'
+                      ? 'Words like これ, それ, あれ, どれ that point to things are called こそあど words.'
+                      : 'Những từ chỉ vào sự vật như これ・それ・あれ・どれ gọi là từ こそあど.',
+              style: const TextStyle(fontSize: 12),
+            ),
+            const SizedBox(height: 6),
+            for (var i = 0; i < rows.length; i++)
+              Container(
+                width: double.infinity,
+                margin: const EdgeInsets.only(bottom: 4),
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(color: colors[i], borderRadius: BorderRadius.circular(8)),
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Text(rows[i][0], style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+                  Text('➡ ${rows[i][1]}', style: const TextStyle(fontSize: 12)),
+                ]),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
   // ことわざって なあに？ (れい) -- sach: trang 3
   Widget _kotoGuide(String lang) {
     return Padding(
@@ -458,7 +539,7 @@ class _KokugoWordScreenState extends State<KokugoWordScreen> {
           ),
         ));
       } else if (part.text.isNotEmpty) {
-        children.add(Text(part.text, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w600)));
+        children.add(RubyText(part.text, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w600, color: Colors.black87)));
       }
     }
     return Container(

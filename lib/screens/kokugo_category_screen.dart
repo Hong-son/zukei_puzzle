@@ -88,7 +88,7 @@ class KokugoCategoryScreen extends StatelessWidget {
                       if (lesson.kind == 'hantai') return KokugoHantaiScreen(lesson: lesson);
                       if (lesson.kind == 'ruigi') return KokugoRuigiScreen(lesson: lesson);
                       if (lesson.kind == 'kanyou') return KokugoIdiomScreen(lesson: lesson);
-                      if (lesson.kind == 'setsuzoku' || lesson.kind == 'tsunagi' || lesson.kind == 'doyomi') return KokugoWordScreen(lesson: lesson);
+                      if (lesson.kind == 'setsuzoku' || lesson.kind == 'tsunagi' || lesson.kind == 'doyomi' || lesson.kind == 'kosoado') return KokugoWordScreen(lesson: lesson);
                       if (lesson.kind == 'narabe') return KokugoNarabeScreen(lesson: lesson);
                       if (lesson.kind == 'bunsaku') return KokugoBunScreen(lesson: lesson);
                       if (lesson.kind == 'shiji' || lesson.kind == 'erabu') return KokugoShijiScreen(lesson: lesson);
